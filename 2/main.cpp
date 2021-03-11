@@ -98,10 +98,61 @@ int* Schrage(job* jobs) {
     return pi;
 }
 
+void printuj(const char* name, job* jobs, int count, int Cmax, int pi[]) {
+//wypisywanie wyników
+    printf("nr: [");
+
+    for(uint8_t i = 0; i<count; ++i) {
+        printf("%3d, ", jobs[pi[i]].number + 1);
+    }
+
+    printf("]\nr:  [");
+
+    for(uint8_t i = 0; i<count; ++i) {
+        printf("%3d, ", jobs[pi[i]].r);
+    }
+
+    printf("]\np:  [");
+
+    for(uint8_t i = 0; i<count; ++i) {
+        printf("%3d, ", jobs[pi[i]].p);
+    }
+
+    printf("]\nq:  [");
+
+    for(uint8_t i = 0; i<count; ++i) {
+        printf("%3d, ", jobs[pi[i]].q);
+    }
+
+    printf("]\n%s\n\npi: [", name);
+
+    for(uint8_t i = 0; i<count; ++i) {
+        printf("%3d, ", pi[i] + 1);
+    }
+
+    printf("]\nS:  [");
+
+    for(uint8_t i = 0; i<count; ++i) {
+        printf("%3d, ", jobs[pi[i]].s);
+    }
+
+    printf("]\nC:  [");
+
+    for(uint8_t i = 0; i<count; ++i) {
+        printf("%3d, ", jobs[pi[i]].c);
+    }
+
+    printf("]\nCq: [");
+
+    for(uint8_t i = 0; i<count; ++i) {
+        printf("%3d, ", jobs[pi[i]].c + jobs[pi[i]].q);
+    }
+    printf("]\nCmax: %d\n", Cmax);
+}
 
 int main() {
-    // std::cin >> count;
-    // std::cin >> seed;
+    std::cin >> count;
+    std::cin >> seed;
     RandomNumberGenerator randf(seed);
     int A = 0;
     int X = 29; //bo tak
@@ -129,62 +180,19 @@ int main() {
         jobs[i].q = randf.nextInt(1, A); //losowanie czasu przygotowywania
     }
 
-    
-    
-    pi = Schrage(jobs);
-    int Cmax = calculate(jobs, pi, count);
-
-
-    //wypisywanie wyników
     printf("Źródło losowania: %d \nRozmiar problemu: %d\n", seed, count);
-    printf("nr: [");
+    
 
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].number + 1);
-    }
+    int Cmax = calculate(jobs, pi, count);
+    printuj("Permutacja Naturalna", jobs, count, Cmax, pi);
 
-    printf("]\nr:  [");
+    pi = Schrage(jobs);
+    Cmax = calculate(jobs, pi, count);
+    printuj("Kolejność po alg Schrage", jobs, count, Cmax, pi);
 
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].r);
-    }
 
-    printf("]\np:  [");
 
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].p);
-    }
-
-    printf("]\nq:  [");
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].q);
-    }
-
-    printf("]\nPermutacja naturalna\n\npi: [");
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", pi[i] + 1);
-    }
-
-    printf("]\nS:  [");
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].s);
-    }
-
-    printf("]\nC:  [");
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].c);
-    }
-
-    printf("]\nCq:  [");
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].c + jobs[pi[i]].q);
-    }
-    printf("]\nCmax: %d\n", Cmax);
+    
 
     return 0;
 }
