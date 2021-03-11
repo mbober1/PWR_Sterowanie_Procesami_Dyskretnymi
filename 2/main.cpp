@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "RandomNumberGenerator.h"
 #include <iostream> 
-#include <list>
+#include <vector>
 
 
 int seed = 1;
@@ -46,21 +46,30 @@ int calculate(job* jobs, int* pi, int count) {
     return Cmax;
 }
 
-int minR(std::list<job> N) {
+int minR(std::vector<job> N) {
     int t = (1<<16);
-    for(std::list<job>::iterator it = N.begin(); it != N.end(); ++it) {
+    for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
         t = min(t, it->r);
     }
     return t;
 }
+
+int maxQ(std::vector<job> N) {
+    int t = 0;
+    for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
+        if(it->q > N[t].q) t = it-N.begin();
+    }
+    return t;
+}
+
 
 
 int* Schrage(job* jobs) {
     int k = 0;
     int* pi = new int[count];
 
-    std::list<job> G; //zbiór zadań gotowych do realizacji
-    std::list<job> N; //zbiór zadań nieuszeregowanych
+    std::vector<job> G; //zbiór zadań gotowych do realizacji
+    std::vector<job> N; //zbiór zadań nieuszeregowanych
     for(uint8_t i = 0; i<count; ++i)    N.push_back(jobs[i]);
 
     int t = minR(N);
@@ -68,23 +77,23 @@ int* Schrage(job* jobs) {
     while (!G.empty() || !N.empty()) {
         while (!N.empty() && minR(N) <= t) {
             int temp = minR(N);
-            for(std::list<job>::iterator it = N.begin(); it != N.end(); ++it) {
+            for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
                 if(it->r == temp) {
-                    G.splice(G.begin(), N, it);
+                    G.push_back(*it);
+                    N.erase(it);
                     break;
                 }
             }
         }
 
         if(!G.empty()) {
-            printf("%d, ",G.back().number + 1);
-            pi[k++] = G.back().number;
-            t =+ G.back().p;
-            G.pop_back();
+            int j = maxQ(G);
+            pi[k++] = G[j].number;
+            t += G[j].p;
+            G.erase(G.begin() + j);
         } else {
             t = minR(N);
         }
-        
     }
     return pi;
 }
@@ -121,10 +130,10 @@ int main() {
     }
 
     
-    int Cmax = calculate(jobs, pi, count);
     
-    // delete pi;
     pi = Schrage(jobs);
+    int Cmax = calculate(jobs, pi, count);
+
 
     //wypisywanie wyników
     printf("Źródło losowania: %d \nRozmiar problemu: %d\n", seed, count);
