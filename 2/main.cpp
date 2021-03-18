@@ -54,6 +54,14 @@ int minR(std::vector<job> N) {
     return t;
 }
 
+
+int minRit(std::vector<job> N) {
+    int t = minR(N);
+    for(int i = 0; i < N.size(); ++i) if(N[i].r == t) return i;
+    return 0;
+}
+
+
 int maxQ(std::vector<job> N) {
     int t = 0;
     for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
@@ -64,7 +72,7 @@ int maxQ(std::vector<job> N) {
 
 
 
-int* Schrage(job* jobs) {
+int* SchragePmtn(job* jobs) {
     int k = 0;
     int* pi = new int[count];
 
@@ -75,19 +83,26 @@ int* Schrage(job* jobs) {
     int t = minR(N);
 
     while (!G.empty() || !N.empty()) {
-        while (!N.empty() && minR(N) <= t) {
-            int temp = minR(N);
-            for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
-                if(it->r == temp) {
-                    G.push_back(*it);
-                    N.erase(it);
-                    break;
-                }
-            }
+        int Cmax = calculate(jobs, pi, k);
+
+        while (!N.empty() && minR(N) <= t) { //faza 1
+            int temp = minRit(N);
+            G.push_back(N[temp]);
+            N.erase(N.begin() + temp);
         }
 
-        if(!G.empty()) {
+        if(!G.empty()) { //faza 2
             int j = maxQ(G);
+            // int temp = minRit(N);
+            // if(G[j].p + t > N[temp].r) { //faza 3
+            //     t += N[temp].q; //3
+            //     G[j].p = G[j].p + t - N[temp].r; //4
+            //     N.push_back(G[j]);
+            //     G.erase(G.begin() + j); 
+            //     pi[k++] = N[temp].number;
+            //     N.erase(N.begin() + temp);
+            // }
+
             pi[k++] = G[j].number;
             t += G[j].p;
             G.erase(G.begin() + j);
@@ -97,6 +112,7 @@ int* Schrage(job* jobs) {
     }
     return pi;
 }
+
 
 void printuj(const char* name, job* jobs, int count, int Cmax, int pi[]) {
 //wypisywanie wyników
@@ -151,8 +167,8 @@ void printuj(const char* name, job* jobs, int count, int Cmax, int pi[]) {
 }
 
 int main() {
-    std::cin >> count;
-    std::cin >> seed;
+    // std::cin >> count;
+    // std::cin >> seed;
     RandomNumberGenerator randf(seed);
     int A = 0;
     int X = 29; //bo tak
@@ -186,7 +202,7 @@ int main() {
     int Cmax = calculate(jobs, pi, count);
     printuj("Permutacja Naturalna", jobs, count, Cmax, pi);
 
-    pi = Schrage(jobs);
+    pi = SchragePmtn(jobs);
     Cmax = calculate(jobs, pi, count);
     printuj("Kolejność po alg Schrage", jobs, count, Cmax, pi);
 
