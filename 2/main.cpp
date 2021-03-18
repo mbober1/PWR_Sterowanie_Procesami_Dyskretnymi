@@ -9,7 +9,6 @@
 int seed = 1;
 int count = 6;
 
-
 class job
 {
 public:
@@ -83,7 +82,7 @@ struct {
     }
 } abcd;
 
-std::vector<int> SHRAGEEEEEEEEEEEE(const std::vector<job> &jobs) {
+std::vector<int> SchragePmtn(const std::vector<job> &jobs) {
     std::vector<int> pi; //lista wykonywania
     std::vector<job> G; //zbiór zadań gotowych do realizacji
     std::vector<job> N; //zbiór zadań nieuszeregowanych
@@ -116,21 +115,15 @@ std::vector<int> SHRAGEEEEEEEEEEEE(const std::vector<job> &jobs) {
             pi.push_back(G[j].number);
             t += G[j].p;
 
-            bool flag = false;
-
             // Jeżeli jest nieuszeregowane zadanie które dlużej stygnie
             if (!N.empty() && N[0].r <= t && N[0].q > G[j].q) {
                 printf("Zadanie %d przerywa zadanie %d!\n", N[0].number+1, G[j].number+1);
-                flag = true;
 
                 // Ustawiamy aktualnemu zadaniu nowy czas trwania (pomniejszony o to co już wykonał)
                 G[j].p = t - N[0].r;
 
                 // Cofamy się w czasie
-                t = N[0].r + N[0].p;
-
-                // printf("[!] Zaczynamy zadanie %d\n", N[0].number+1);
-                pi.push_back(N[0].number);
+                t = N[0].r;
 
                 // Przenosimy aktualne zadanie do nieuszeregowanych i usuwamy to zadanie
                 N.push_back(G[j]);
@@ -143,80 +136,13 @@ std::vector<int> SHRAGEEEEEEEEEEEE(const std::vector<job> &jobs) {
                 std::sort(N.begin(), N.end(), abcd);
                 j = maxQ(G);
             }
-
-            if (flag) {
-                // printf("Koniec przerwań\n");
-                t -= G[j].p;
-                pi.pop_back();
-            }
-            
-            if (!flag) {
-                // i usuwamy to zadanie
-                G.erase(G.begin() + j);
-            }
+            // i usuwamy to zadanie
+            else G.erase(G.begin() + j);
         }
     }
 
     return pi;
 }
-
-
-std::vector<int> SchragePmtn(const std::vector<job> &jobs) {
-    int k = 0;
-    std::vector<int> pi; //lista wykonywania
-    std::vector<job> G; //zbiór zadań gotowych do realizacji
-    std::vector<job> N; //zbiór zadań nieuszeregowanych
-    for(uint8_t i = 0; i<count; ++i) N.push_back(jobs[i]);
-
-    std::sort(N.begin(), N.end(), abcd);
-    int t = N[0].r;
-
-    while (!G.empty() || !N.empty()) {
-        bool przerwanie = false;
-        std::sort(N.begin(), N.end(), abcd);
-
-        if (!G.empty()) {
-            int j = maxQ(G);
-            if (N[0].r <= t && N[0].q > G[j].q) przerwanie = true;
-        }
-
-        if (!przerwanie) {
-            while (!N.empty() && minR(N) <= t) { //faza 1
-                std::sort(N.begin(), N.end(), abcd);
-                
-            }
-        }
-
-        if(!G.empty()) { //faza 2
-            int j = maxQ(G);
-
-            if (!przerwanie) {
-                pi.push_back(G[j].number);
-                t += G[j].p;
-            }
-            
-            if (przerwanie) { 
-                printf("Zadanie %d przerywa zadanie %d!\n", N[0].number+1, G[j].number+1);
-                int nowa_chwila_czasu = t - N[0].r;
-                G[j].p = nowa_chwila_czasu - G[j].r;
-                N.push_back(G[j]);
-                t = nowa_chwila_czasu;
-
-                pi.push_back(N[0].number);
-                t += N[0].p;
-
-                N.erase(N.begin() + 0);
-            }
-
-            G.erase(G.begin() + j);
-
-        } else {
-            t = minR(N);
-        }
-    }
-    return pi;
-}
-
 
 void log(const char* name, std::vector<job> &jobs, const std::vector<int> &pi) {
     int Cmax = calculate(jobs, pi);
@@ -318,7 +244,7 @@ int main() {
     log("Permutacja Naturalna", jobs, pi);
 
 
-    pi = SHRAGEEEEEEEEEEEE(jobs);
+    pi = SchragePmtn(jobs);
     log("Kolejność po alg Schrage", jobs, pi);
 
 
