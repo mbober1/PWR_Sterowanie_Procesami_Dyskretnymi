@@ -6,7 +6,7 @@
 #include <algorithm>
 
 
-int seed = 7523;
+int seed = 1;
 int count = 10;
 
 
@@ -16,30 +16,30 @@ public:
     int number, r, p, q; //numer, czas przygotowywania, czas wykonywania, czas stygniecia
     int s, c; //czas rozpoczecia, czas zakonczenia
     job(int number, int r, int p);
-    job();
+    job(int number);
 };
 
 job::job(int number, int r, int p) : number(number), r(r), p(p) {}
 
-job::job() {}
+job::job(int number) : number(number) {}
 
 
-int max(int a, int b) {
+inline int max(int a, int b) {
     if(a>b) return a;
     else return b;
 }
 
-int min(int a, int b) {
+inline int min(int a, int b) {
     if(a<b) return a;
     else return b;
 }
 
-int calculate(job* jobs, int* pi, int count) {
+inline int calculate(std::vector<job> &jobs, const std::vector<int> &pi) {
     int Cmax = 0; //czas zakończenia 
     jobs[pi[0]].s = jobs[pi[0]].r; 
     jobs[pi[0]].c = jobs[pi[0]].s + jobs[pi[0]].p;
 
-    for(uint8_t i = 1; i<count; ++i) {
+    for(uint8_t i = 1; i< jobs.size(); ++i) {
         jobs[pi[i]].s = max(jobs[pi[i]].r, jobs[pi[i-1]].c);
         jobs[pi[i]].c = jobs[pi[i]].s + jobs[pi[i]].p;
         Cmax = max(Cmax, jobs[pi[i]].c + jobs[pi[i]].q);
@@ -71,16 +71,6 @@ int maxQ(std::vector<job> N) {
     return t;
 }
 
-bool porównaj(const job& A, const job& B) {
-    if (A.r < B.r) return true;
-    if (A.r > B.r) return false;
-
-    if (A.q > B.q) return true;
-    if (A.q < B.q) return false;
-
-    return false; 
-}
-
 struct {
     bool operator() (const job& A, const job& B) const {
         if (A.r < B.r) return true;
@@ -93,57 +83,94 @@ struct {
     }
 } abcd;
 
-
-
-int* SchragePmtn(job* jobs) {
-    int k = 0;
-    int* pi = new int[100];
-
+std::vector<int> SHRAGEEEEEEEEEEEE(const std::vector<job> &jobs) {
+    std::vector<int> pi; //lista wykonywania
     std::vector<job> G; //zbiór zadań gotowych do realizacji
     std::vector<job> N; //zbiór zadań nieuszeregowanych
-    for(uint8_t i = 0; i<count; ++i)    N.push_back(jobs[i]);
 
-    // std::sort(N.begin(), N.end(), abcd);
-    int t = minR(N);
+    // Inicjalizacja listy zadań nieuszeregowanych
+    for(uint8_t i = 0; i<count; ++i) N.push_back(jobs[i]);
+    std::sort(N.begin(), N.end(), abcd);
+
+    // Ustawiamy aktualny czas na początek najwcześniejszego zadania
+    int t = N[0].r;
+
+    // Działamy dopóki zostały zadania
+    while (!G.empty() || !N.empty()) {
+        // Jeżeli jest nieuszeregowane zadanie które jest już gotowe...
+        while (!N.empty() && N[0].r <= t) {
+            // to przerzucamy je do G
+            G.push_back(N[0]);
+            N.erase(N.begin());
+            std::sort(N.begin(), N.end(), abcd);
+        }
+
+        // Jeśli nie ma gotowych zadań to przesuwamy czas do najbliższego zadania
+        if (G.empty()) t = N[0].r;
+        // w przeciwnym wypadku...
+        else {
+            // szukamy zadania najdluzej stygnącego
+            int j = maxQ(G);
+            // zwiększamy czas... 
+            pi.push_back(G[j].number);
+            t += G[j].p;
+            // i usuwamy to zadanie
+            G.erase(G.begin() + j);
+        }
+    }
+
+    return pi;
+}
+
+
+std::vector<int> SchragePmtn(const std::vector<job> &jobs) {
+    int k = 0;
+    std::vector<int> pi; //lista wykonywania
+    std::vector<job> G; //zbiór zadań gotowych do realizacji
+    std::vector<job> N; //zbiór zadań nieuszeregowanych
+    for(uint8_t i = 0; i<count; ++i) N.push_back(jobs[i]);
+
+    std::sort(N.begin(), N.end(), abcd);
+    int t = N[0].r;
 
     while (!G.empty() || !N.empty()) {
-        int Cmax = calculate(jobs, pi, k);
+        bool przerwanie = false;
+        std::sort(N.begin(), N.end(), abcd);
 
-        while (!N.empty() && minR(N) <= t) { //faza 1
-            // std::sort(N.begin(), N.end(), abcd);
-            int temp = minRit(N);
-            G.push_back(N[temp]);
-            N.erase(N.begin() + temp);
+        if (!G.empty()) {
+            int j = maxQ(G);
+            if (N[0].r <= t && N[0].q > G[j].q) przerwanie = true;
+        }
+
+        if (!przerwanie) {
+            while (!N.empty() && minR(N) <= t) { //faza 1
+                std::sort(N.begin(), N.end(), abcd);
+                
+            }
         }
 
         if(!G.empty()) { //faza 2
             int j = maxQ(G);
-            // int temp = minRit(N);
-            // if(G[j].q < N[temp].q) { //faza 3
-            //     printf("powinno być %d, zamiast %d\n", N[temp].number + 1, G[j].number);
-            //     t += N[temp].q; //3
-            //     G[j].p += t - N[temp].r; //4
-            //     pi[k++] = N[temp].number;
-            //     N.erase(N.begin() + temp);
-            //     N.push_back(G[j]);
-            //     G.erase(G.begin() + j); 
-            // } else {
-                pi[k++] = G[j].number;
+
+            if (!przerwanie) {
+                pi.push_back(G[j].number);
                 t += G[j].p;
+            }
+            
+            if (przerwanie) { 
+                printf("Zadanie %d przerywa zadanie %d!\n", N[0].number+1, G[j].number+1);
+                int nowa_chwila_czasu = t - N[0].r;
+                G[j].p = nowa_chwila_czasu - G[j].r;
+                N.push_back(G[j]);
+                t = nowa_chwila_czasu;
 
-                std::sort(N.begin(), N.end(), abcd);
-                int dupa1 = minRit(N);
-                if (N[dupa1].r <= t && N[dupa1].q > G[j].q) { 
-                    printf("Zadanie %d przerywa zadanie %d!\n", N[dupa1].number+1, G[j].number+1);
-                    int aaa = t - N[dupa1].r;
-                    G[j].p = aaa - G[j].r;
-                    N.push_back(G[j]);
-                    N.erase(N.begin() + dupa1);
-                }
+                pi.push_back(N[0].number);
+                t += N[0].p;
 
-                G.erase(G.begin() + j);
-                
-            // }
+                N.erase(N.begin() + 0);
+            }
+
+            G.erase(G.begin() + j);
 
         } else {
             t = minR(N);
@@ -153,54 +180,35 @@ int* SchragePmtn(job* jobs) {
 }
 
 
-void printuj(const char* name, job* jobs, int count, int Cmax, int pi[]) {
-//wypisywanie wyników
-    printf("nr: [");
+void log(const char* name, std::vector<job> &jobs, const std::vector<int> &pi) {
+    int Cmax = calculate(jobs, pi);
 
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].number + 1);
-    }
+    printf("]\n\n%s\npi: [", name);
 
-    printf("]\nr:  [");
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].r);
-    }
-
-    printf("]\np:  [");
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].p);
-    }
-
-    printf("]\nq:  [");
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].q);
-    }
-
-    printf("]\n%s\n\npi: [", name);
-
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", pi[i] + 1);
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", pi[i] + 1);
+        if(i != jobs.size() - 1) printf(", ");
     }
 
     printf("]\nS:  [");
 
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].s);
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[pi[i]].s);
+        if(i != jobs.size() - 1) printf(", ");
     }
 
     printf("]\nC:  [");
 
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].c);
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[pi[i]].c);
+        if(i != jobs.size() - 1) printf(", ");
     }
 
     printf("]\nCq: [");
 
-    for(uint8_t i = 0; i<count; ++i) {
-        printf("%3d, ", jobs[pi[i]].c + jobs[pi[i]].q);
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[pi[i]].c + jobs[pi[i]].q);
+        if(i != jobs.size() - 1) printf(", ");
     }
     printf("]\nCmax: %d\n", Cmax);
 }
@@ -213,13 +221,13 @@ int main() {
     int X = 29; //bo tak
 
 
-    job* jobs = new job[count];
-    int* pi = new int[count];
+    std::vector<job> jobs; //zadania
+    std::vector<int> pi;   //kolejność zadań
 
     //generowanie instancji
     for(uint8_t i = 0; i<count; ++i) { 
-        jobs[i].number = i; //nadawanie numerów
-        pi[i] = i;
+        jobs.emplace_back(i);
+        pi.push_back(i);
     }
 
     for(uint8_t i = 0; i<count; ++i) {
@@ -235,15 +243,45 @@ int main() {
         jobs[i].q = randf.nextInt(1, A); //losowanie czasu przygotowywania
     }
 
-    printf("Źródło losowania: %d \nRozmiar problemu: %d\n", seed, count);
-    
+    int Cmax = calculate(jobs, pi);
 
-    int Cmax = calculate(jobs, pi, count);
-    printuj("Permutacja Naturalna", jobs, count, Cmax, pi);
 
-    pi = SchragePmtn(jobs);
-    Cmax = calculate(jobs, pi, count);
-    printuj("Kolejność po alg Schrage", jobs, count, Cmax, pi);
+    printf("Źródło losowania: %d \nRozmiar problemu: %d\n\n", seed, count);
+
+    printf("nr: [");
+
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[pi[i]].number + 1);
+        if(i != jobs.size() - 1) printf(", ");
+    }
+
+    printf("]\nr:  [");
+
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[pi[i]].r);
+        if(i != jobs.size() - 1) printf(", ");
+    }
+
+    printf("]\np:  [");
+
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[pi[i]].p);
+        if(i != jobs.size() - 1) printf(", ");
+    }
+
+    printf("]\nq:  [");
+
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[pi[i]].q);
+        if(i != jobs.size() - 1) printf(", ");
+    }
+
+
+    log("Permutacja Naturalna", jobs, pi);
+
+
+    pi = SHRAGEEEEEEEEEEEE(jobs);
+    log("Kolejność po alg Schrage", jobs, pi);
 
 
 
