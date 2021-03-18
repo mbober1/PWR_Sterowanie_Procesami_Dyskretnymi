@@ -7,7 +7,7 @@
 
 
 int seed = 1;
-int count = 10;
+int count = 6;
 
 
 class job
@@ -112,10 +112,48 @@ std::vector<int> SHRAGEEEEEEEEEEEE(const std::vector<job> &jobs) {
             // szukamy zadania najdluzej stygnącego
             int j = maxQ(G);
             // zwiększamy czas... 
+            printf("Zaczynamy zadanie %d\n", G[j].number+1);
             pi.push_back(G[j].number);
             t += G[j].p;
-            // i usuwamy to zadanie
-            G.erase(G.begin() + j);
+
+            bool flag = false;
+
+            // Jeżeli jest nieuszeregowane zadanie które dlużej stygnie
+            if (!N.empty() && N[0].r <= t && N[0].q > G[j].q) {
+                printf("Zadanie %d przerywa zadanie %d!\n", N[0].number+1, G[j].number+1);
+                flag = true;
+
+                // Ustawiamy aktualnemu zadaniu nowy czas trwania (pomniejszony o to co już wykonał)
+                G[j].p = t - N[0].r;
+
+                // Cofamy się w czasie
+                t = N[0].r + N[0].p;
+
+                // printf("[!] Zaczynamy zadanie %d\n", N[0].number+1);
+                pi.push_back(N[0].number);
+
+                // Przenosimy aktualne zadanie do nieuszeregowanych i usuwamy to zadanie
+                N.push_back(G[j]);
+                G.erase(G.begin() + j);
+
+                // Dodajemy nowe zadanie do gotowych do wykonania i usuwamy je z nieuszeregowanych
+                G.push_back(N[0]);
+                N.erase(N.begin() + 0);
+
+                std::sort(N.begin(), N.end(), abcd);
+                j = maxQ(G);
+            }
+
+            if (flag) {
+                // printf("Koniec przerwań\n");
+                t -= G[j].p;
+                pi.pop_back();
+            }
+            
+            if (!flag) {
+                // i usuwamy to zadanie
+                G.erase(G.begin() + j);
+            }
         }
     }
 
@@ -185,30 +223,30 @@ void log(const char* name, std::vector<job> &jobs, const std::vector<int> &pi) {
 
     printf("]\n\n%s\npi: [", name);
 
-    for(uint8_t i = 0; i < jobs.size(); ++i) {
+    for(uint8_t i = 0; i < pi.size(); ++i) {
         printf("%3d", pi[i] + 1);
-        if(i != jobs.size() - 1) printf(", ");
+        if(i != pi.size() - 1) printf(", ");
     }
 
     printf("]\nS:  [");
 
-    for(uint8_t i = 0; i < jobs.size(); ++i) {
+    for(uint8_t i = 0; i < pi.size(); ++i) {
         printf("%3d", jobs[pi[i]].s);
-        if(i != jobs.size() - 1) printf(", ");
+        if(i != pi.size() - 1) printf(", ");
     }
 
     printf("]\nC:  [");
 
-    for(uint8_t i = 0; i < jobs.size(); ++i) {
+    for(uint8_t i = 0; i < pi.size(); ++i) {
         printf("%3d", jobs[pi[i]].c);
-        if(i != jobs.size() - 1) printf(", ");
+        if(i != pi.size() - 1) printf(", ");
     }
 
     printf("]\nCq: [");
 
-    for(uint8_t i = 0; i < jobs.size(); ++i) {
+    for(uint8_t i = 0; i < pi.size(); ++i) {
         printf("%3d", jobs[pi[i]].c + jobs[pi[i]].q);
-        if(i != jobs.size() - 1) printf(", ");
+        if(i != pi.size() - 1) printf(", ");
     }
     printf("]\nCmax: %d\n", Cmax);
 }
@@ -283,9 +321,6 @@ int main() {
     pi = SHRAGEEEEEEEEEEEE(jobs);
     log("Kolejność po alg Schrage", jobs, pi);
 
-
-
-    
 
     return 0;
 }
