@@ -3,22 +3,10 @@
 #include "RandomNumberGenerator.h"
 #include <iostream> 
 #include <vector>
-#include <algorithm>
 
 #include "pi.hpp"
 #include "job.hpp"
 
-struct {
-    bool operator() (const job& A, const job& B) const {
-        if (A.r < B.r) return true;
-        if (A.r > B.r) return false;
-
-        if (A.q > B.q) return true;
-        if (A.q < B.q) return false;
-
-        return false; 
-    }
-} abcd;
 
 std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
     std::vector<Pi> pi; //lista wykonywania
@@ -27,23 +15,21 @@ std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
 
     // Inicjalizacja listy zadań nieuszeregowanych
     for(uint8_t i = 0; i<jobs.size(); ++i) N.push_back(jobs[i]);
-    std::sort(N.begin(), N.end(), abcd);
 
     // Ustawiamy aktualny czas na początek najwcześniejszego zadania
-    int t = N[0].r;
+    int t = job::minR(N);
 
     // Działamy dopóki zostały zadania
     while (!G.empty() || !N.empty()) {
         // Jeżeli jest nieuszeregowane zadanie które jest już gotowe...
-        while (!N.empty() && N[0].r <= t) {
+        while (!N.empty() && job::minR(N) <= t) {
             // to przerzucamy je do G
-            G.push_back(N[0]);
-            N.erase(N.begin());
-            std::sort(N.begin(), N.end(), abcd);
+            G.push_back(N[job::minRit(N)]);
+            N.erase(N.begin() + job::minRit(N));
         }
 
         // Jeśli nie ma gotowych zadań to przesuwamy czas do najbliższego zadania
-        if (G.empty()) t = N[0].r;
+        if (G.empty()) t = job::minR(N);
         // w przeciwnym wypadku...
         else {
             // szukamy zadania najdluzej stygnącego
@@ -55,14 +41,15 @@ std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
             t += G[j].p;
 
             // Jeżeli jest nieuszeregowane zadanie które dlużej stygnie
-            if (!N.empty() && N[0].r <= t && N[0].q > G[j].q) {
+            if (!N.empty() && job::minR(N) <= t && N[job::minRit(N)].q > G[j].q) {
                 // printf("Zadanie %d przerywa zadanie %d!\n", N[0].number+1, G[j].number+1);
-
+                auto minerit = job::minRit(N);
+                auto miner = N[minerit].r;
                 // Ustawiamy aktualnemu zadaniu nowy czas trwania (pomniejszony o to co już wykonał)
-                G[j].p = t - N[0].r;
+                G[j].p = t - miner;
 
                 // Cofamy się w czasie
-                t = N[0].r;
+                t = miner;
 
                 // Aktualizacja czasu skonczenia zadania
                 // printf("Zmiana [%d] C: %d -> %d\n", pi[pi.size() - 1].number, pi[pi.size() - 1].c, t);
@@ -73,17 +60,15 @@ std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
                 G.erase(G.begin() + j);
 
                 // Dodajemy nowe zadanie do gotowych do wykonania i usuwamy je z nieuszeregowanych
-                G.push_back(N[0]);
-                N.erase(N.begin() + 0);
+                G.push_back(N[minerit]);
+                N.erase(N.begin() + minerit);
 
-                std::sort(N.begin(), N.end(), abcd);
                 j = job::maxQ(G);
             }
             // i usuwamy to zadanie
             else G.erase(G.begin() + j);
         }
     }
-
     return pi;
 }
 
