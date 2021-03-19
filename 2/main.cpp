@@ -72,6 +72,47 @@ std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
     return pi;
 }
 
+
+
+std::vector<Pi> Schrage(const std::vector<job> &jobs) {
+    std::vector<Pi> pi; //lista wykonywania
+    std::vector<job> G; //zbiór zadań gotowych do realizacji
+    std::vector<job> N; //zbiór zadań nieuszeregowanych
+
+    // Inicjalizacja listy zadań nieuszeregowanych
+    for(uint8_t i = 0; i<jobs.size(); ++i) N.push_back(jobs[i]);
+
+    // Ustawiamy aktualny czas na początek najwcześniejszego zadania
+    int t = job::minR(N);
+
+    // Działamy dopóki zostały zadania
+    while (!G.empty() || !N.empty()) {
+        // Jeżeli jest nieuszeregowane zadanie które jest już gotowe...
+        while (!N.empty() && job::minR(N) <= t) {
+            // to przerzucamy je do G
+            G.push_back(N[job::minRit(N)]);
+            N.erase(N.begin() + job::minRit(N));
+        }
+
+        // Jeśli nie ma gotowych zadań to przesuwamy czas do najbliższego zadania
+        if (G.empty()) t = job::minR(N);
+        // w przeciwnym wypadku...
+        else {
+            // szukamy zadania najdluzej stygnącego
+            int j = job::maxQ(G);
+            // zwiększamy czas... 
+            // printf("Zaczynamy zadanie %d\n", G[j].number+1);
+            pi.emplace_back(t, t+G[j].p, G[j].number);
+            // printf("[%d] S: %d, C: %d\n", pi[pi.size() - 1].number, pi[pi.size() - 1].s, pi[pi.size() - 1].c);
+            t += G[j].p;
+
+            // i usuwamy to zadanie
+            G.erase(G.begin() + j);
+        }
+    }
+    return pi;
+}
+
 int cmax(std::vector<job> &jobs, const std::vector<Pi> &pi) {
     int c = 0;
     for (auto &job : pi) {
@@ -174,18 +215,19 @@ void printJobsInfo(std::vector<job> jobs, int size, int seed) {
 }
 
 int main() {
-    // std::cin >> count;
-    // std::cin >> seed;
-    
-    // log("Permutacja Naturalna", jobs, pi);
-
     int size = 10;
     int seed = 7523;
 
+    // std::cin >> count;
+    // std::cin >> seed;
+
     std::vector<job> jobs = generateJobs(size, seed);
     printJobsInfo(jobs, size, seed);
-    std::vector<Pi> pi = SchragePmtn(jobs);
+    std::vector<Pi> pi = Schrage(jobs);
     log("Kolejność po alg Schrage", jobs, pi);
+
+    pi = SchragePmtn(jobs);
+    log("Kolejność po alg Schrage z przerwaniami", jobs, pi);
 
     return 0;
 }
