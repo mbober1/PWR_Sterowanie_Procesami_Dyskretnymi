@@ -3,16 +3,46 @@
 #include "pi.hpp"
 #include <queue>
 
+#define INFINITY (1<<16)
 
-int cmax(std::vector<job> &jobs, const std::vector<Pi> &pi) {
+int cmax(std::vector<job> &jobs, const std::vector<Pi> &pi, int* j = nullptr) {
     int c = 0;
-    for (auto &job : pi) {
-        int tmp = job.c + jobs[job.number].q;
-        if (tmp > c) c = tmp;
+    int idx = 0;
+    for (int i = 0; i < pi.size(); ++i) {
+        int tmp = pi[i].c + jobs[pi[i].number].q;
+        if (tmp > c) {
+            c = tmp;
+            idx = i;
+        } 
     }
-
+    if(j != nullptr) *j = idx;
     return c;
 }
+
+int calcA(std::vector<job> &jobs, const std::vector<Pi> &pi, int b) {
+    int min = INFINITY;
+    int minj = 0;
+    for(int j = 0; j < pi.size(); ++j) {
+        int sum = 0;
+        for(int i = j; i < b; ++i) sum += jobs[pi[i].number].p;
+        int zmienna = jobs[pi[j].number].r + sum + jobs[pi[b].number].q;
+        if(zmienna < min) {
+            min = zmienna;
+            minj = j;
+        }
+    }
+    return minj;
+}
+
+int calcC(std::vector<job> &jobs, const std::vector<Pi> &pi, int a, int b) {
+    int idx = -1;
+    for(int j = a; j < b; ++j ) {
+        // printf("%d vs %d | %d > %d\n", jobs[pi[j].number].q, jobs[pi[b].number].q, j, idx);
+        if(jobs[pi[j].number].q < jobs[pi[b].number].q && j>idx) idx = j;
+    }
+    return idx;
+}
+
 
 std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
     std::vector<Pi> pi; //lista wykonywania
@@ -172,4 +202,54 @@ std::vector<Pi> SchrageHeap(std::vector<job> &jobs) {
         }
     }
     return pi;
+}
+
+
+std::vector<Pi> Carlier(std::vector<job> jobs, std::vector<Pi> pi2 = {}, int UB = INFINITY) {
+    std::vector<Pi> pi = Schrage(jobs);
+    int b;
+    int U = cmax(jobs, pi, &b);
+
+    if(U < UB) {
+        UB = U;
+        pi2 = pi;
+    }
+
+    int a = calcA(jobs, pi, b);
+    int c = calcC(jobs, pi, a, b);
+
+    if(c == -1) return pi2;
+
+    std::vector<job> K;
+    for(int i = c+1; i <= b; ++i) K.push_back(jobs[pi[i].number]);
+
+    int r2 = job::minR(K);
+    int q2 = job::minQ(K);
+    int p2 = 0;
+    for(int i = 0; i < K.size(); ++i) p2 += K[i].p;
+
+    auto r_bcp = jobs[pi[c].number].r;
+    jobs[pi[c].number].r = max(jobs[pi[c].number].r, r2 + p2);
+
+    int LB = cmax(jobs, SchragePmtn(jobs));
+    if(LB < UB) {
+        auto x = Carlier(jobs, pi2, UB);
+        if (!x.empty()) return x;
+    }
+    jobs[pi[c].number].r = r_bcp;
+
+    auto q_bcp = jobs[pi[c].number].q;
+    jobs[pi[c].number].q = max(jobs[pi[c].number].q, q2 + p2);
+
+    LB = cmax(jobs, SchragePmtn(jobs));
+    
+    if(LB < UB) {
+        auto x = Carlier(jobs, pi2, UB);
+        if (!x.empty()) return x;
+    }
+
+    jobs[pi[c].number].q = q_bcp;
+
+    std::vector<Pi> nul;
+    return nul;
 }

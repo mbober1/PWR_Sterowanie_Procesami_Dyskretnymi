@@ -9,6 +9,7 @@ public:
     bool operator() (const job& A, const job& B);
 
     static int minR(std::vector<job> N);
+    static int minQ(std::vector<job> N);
     static int minRit(std::vector<job> N);
     static int maxQ(std::vector<job> N);
 };
@@ -31,6 +32,14 @@ int job::minR(std::vector<job> N) {
     int t = (1<<16);
     for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
         t = min(t, it->r);
+    }
+    return t;
+}
+
+int job::minQ(std::vector<job> N) {
+    int t = (1<<16);
+    for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
+        t = min(t, it->q);
     }
     return t;
 }
