@@ -6,6 +6,7 @@ public:
     int number, r, p, q; //numer, czas przygotowywania, czas wykonywania, czas stygniecia
     job(int number, int r, int p);
     job(int number);
+    bool operator() (const job& A, const job& B);
 
     static int minR(std::vector<job> N);
     static int minRit(std::vector<job> N);
@@ -47,3 +48,13 @@ int job::maxQ(std::vector<job> N) {
     }
     return t;
 }
+
+bool job::operator() (const job& A, const job& B) {
+    if (A.r < B.r) return !true;
+    if (A.r > B.r) return !false;
+
+    if (A.q > B.q) return !true;
+    if (A.q < B.q) return !false;
+
+    return !false; 
+};
