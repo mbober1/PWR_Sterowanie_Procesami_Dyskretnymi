@@ -5,66 +5,8 @@
 #include <vector>
 #include <algorithm>
 
-
-int seed = 1;
-int count = 6;
-
-class Pi {
-public:
-    int s; // początek wykonywania zadania
-    int c; // koniec wykonywania zadania
-    int number; // numer zadania
-    Pi(int s, int c, int number);
-};
-
-Pi::Pi(int s, int c, int number): s(s), c(c), number(number) {}
-
-class job
-{
-public:
-    int number, r, p, q; //numer, czas przygotowywania, czas wykonywania, czas stygniecia
-    job(int number, int r, int p);
-    job(int number);
-};
-
-job::job(int number, int r, int p) : number(number), r(r), p(p) {}
-
-job::job(int number) : number(number) {}
-
-
-inline int max(int a, int b) {
-    if(a>b) return a;
-    else return b;
-}
-
-inline int min(int a, int b) {
-    if(a<b) return a;
-    else return b;
-}
-
-int minR(std::vector<job> N) {
-    int t = (1<<16);
-    for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
-        t = min(t, it->r);
-    }
-    return t;
-}
-
-
-int minRit(std::vector<job> N) {
-    int t = minR(N);
-    for(int i = 0; i < N.size(); ++i) if(N[i].r == t) return i;
-    return -1;
-}
-
-
-int maxQ(std::vector<job> N) {
-    int t = 0;
-    for(std::vector<job>::iterator it = N.begin(); it != N.end(); ++it) {
-        if(it->q > N[t].q) t = it-N.begin();
-    }
-    return t;
-}
+#include "pi.hpp"
+#include "job.hpp"
 
 struct {
     bool operator() (const job& A, const job& B) const {
@@ -105,16 +47,16 @@ std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
         // w przeciwnym wypadku...
         else {
             // szukamy zadania najdluzej stygnącego
-            int j = maxQ(G);
+            int j = job::maxQ(G);
             // zwiększamy czas... 
-            printf("Zaczynamy zadanie %d\n", G[j].number+1);
+            // printf("Zaczynamy zadanie %d\n", G[j].number+1);
             pi.emplace_back(t, t+G[j].p, G[j].number);
             // printf("[%d] S: %d, C: %d\n", pi[pi.size() - 1].number, pi[pi.size() - 1].s, pi[pi.size() - 1].c);
             t += G[j].p;
 
             // Jeżeli jest nieuszeregowane zadanie które dlużej stygnie
             if (!N.empty() && N[0].r <= t && N[0].q > G[j].q) {
-                printf("Zadanie %d przerywa zadanie %d!\n", N[0].number+1, G[j].number+1);
+                // printf("Zadanie %d przerywa zadanie %d!\n", N[0].number+1, G[j].number+1);
 
                 // Ustawiamy aktualnemu zadaniu nowy czas trwania (pomniejszony o to co już wykonał)
                 G[j].p = t - N[0].r;
@@ -135,7 +77,7 @@ std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
                 N.erase(N.begin() + 0);
 
                 std::sort(N.begin(), N.end(), abcd);
-                j = maxQ(G);
+                j = job::maxQ(G);
             }
             // i usuwamy to zadanie
             else G.erase(G.begin() + j);
@@ -187,76 +129,78 @@ void log(const char* name, std::vector<job> &jobs, const std::vector<Pi> &pi) {
     printf("]\nCmax: %d\n", cmax(jobs, pi));
 }
 
-int main() {
-    // std::cin >> count;
-    // std::cin >> seed;
+std::vector<job> generateJobs(int size, int seed) {
     RandomNumberGenerator randf(seed);
     int A = 0;
     int X = 29; //bo tak
-
-
     std::vector<job> jobs; //zadania
-    std::vector<Pi> pi;   //kolejność zadań
 
     // //generowanie instancji
-    for(uint8_t i = 0; i<count; ++i) { 
+    for(uint8_t i = 0; i<size; ++i) { 
         jobs.emplace_back(i);
-        // pi.push_back(i);
     }
 
-    for(uint8_t i = 0; i<count; ++i) {
+    for(uint8_t i = 0; i<size; ++i) {
         jobs[i].p = randf.nextInt(1, 29); //losowanie czasu wykonywania
         A += jobs[i].p; 
     }
 
-    for(uint8_t i = 0; i<count; ++i) {
+    for(uint8_t i = 0; i<size; ++i) {
         jobs[i].r = randf.nextInt(1, A); //losowanie czasu przygotowywania
     }
 
-    for(uint8_t i = 0; i<count; ++i) {
-        jobs[i].q = randf.nextInt(1, A); //losowanie czasu przygotowywania
+    for(uint8_t i = 0; i<size; ++i) {
+        jobs[i].q = randf.nextInt(1, A); //losowanie czasu stygniecia
     }
 
-    // int Cmax = calculate(jobs, pi);
+    return jobs;
+}
 
+void printJobsInfo(std::vector<job> jobs, int size, int seed) {
+    printf("Źródło losowania: %d \nRozmiar problemu: %d\n\n", seed, size);
 
-    // printf("Źródło losowania: %d \nRozmiar problemu: %d\n\n", seed, count);
+    printf("nr: [");
 
-    // printf("nr: [");
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[i].number + 1);
+        if(i != jobs.size() - 1) printf(", ");
+    }
 
-    // for(uint8_t i = 0; i < jobs.size(); ++i) {
-    //     printf("%3d", jobs[pi[i]].number + 1);
-    //     if(i != jobs.size() - 1) printf(", ");
-    // }
+    printf("]\nr:  [");
 
-    // printf("]\nr:  [");
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[i].r);
+        if(i != jobs.size() - 1) printf(", ");
+    }
 
-    // for(uint8_t i = 0; i < jobs.size(); ++i) {
-    //     printf("%3d", jobs[pi[i]].r);
-    //     if(i != jobs.size() - 1) printf(", ");
-    // }
+    printf("]\np:  [");
 
-    // printf("]\np:  [");
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[i].p);
+        if(i != jobs.size() - 1) printf(", ");
+    }
 
-    // for(uint8_t i = 0; i < jobs.size(); ++i) {
-    //     printf("%3d", jobs[pi[i]].p);
-    //     if(i != jobs.size() - 1) printf(", ");
-    // }
+    printf("]\nq:  [");
 
-    // printf("]\nq:  [");
+    for(uint8_t i = 0; i < jobs.size(); ++i) {
+        printf("%3d", jobs[i].q);
+        if(i != jobs.size() - 1) printf(", ");
+    }
+}
 
-    // for(uint8_t i = 0; i < jobs.size(); ++i) {
-    //     printf("%3d", jobs[pi[i]].q);
-    //     if(i != jobs.size() - 1) printf(", ");
-    // }
-
-
+int main() {
+    // std::cin >> count;
+    // std::cin >> seed;
+    
     // log("Permutacja Naturalna", jobs, pi);
 
+    int size = 10;
+    int seed = 7523;
 
-    pi = SchragePmtn(jobs);
+    std::vector<job> jobs = generateJobs(size, seed);
+    printJobsInfo(jobs, size, seed);
+    std::vector<Pi> pi = SchragePmtn(jobs);
     log("Kolejność po alg Schrage", jobs, pi);
-
 
     return 0;
 }
