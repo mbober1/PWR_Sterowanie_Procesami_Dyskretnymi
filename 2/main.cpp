@@ -7,7 +7,7 @@
 
 
 void log(const char* name, std::vector<job> &jobs, const std::vector<Pi> &pi) {
-    printf("]\n\n%s\npi: [", name);
+    printf("%s\npi: [", name);
 
     for(uint8_t i = 0; i < pi.size(); ++i) {
         printf("%3d", pi[i].number + 1);
@@ -35,7 +35,7 @@ void log(const char* name, std::vector<job> &jobs, const std::vector<Pi> &pi) {
         if(i != pi.size() - 1) printf(", ");
     }
 
-    printf("]\nCmax: %d\n", cmax(jobs, pi));
+    printf("]\nCmax: %d\n\n", cmax(jobs, pi));
 }
 
 std::vector<job> generateJobs(int size, int seed) {
@@ -95,6 +95,7 @@ void printJobsInfo(std::vector<job> jobs, int size, int seed) {
         printf("%3d", jobs[i].q);
         if(i != jobs.size() - 1) printf(", ");
     }
+    printf("\n\n");
 }
 
 int main() {
@@ -105,12 +106,11 @@ int main() {
 
 
     std::vector<job> jobs = generateJobs(size, seed);
-    // printJobsInfo(jobs, size, seed);
-    std::vector<Pi> pi = SchrageHeap(jobs);
-    log("[Wektor] Kolejność po alg Schrage", jobs, pi);
-    // pi = SchragePmtn(jobs);
-    // log("[Wektor] Kolejność po alg Schrage z przerwaniami", jobs, pi);
+    printJobsInfo(jobs, size, seed);
 
+    log("[Wektor] Kolejność po alg Schrage", jobs, Schrage(jobs));
+    log("[Kopiec] Kolejność po alg Schrage", jobs, SchrageHeap(jobs));
+    log("[Wektor] Kolejność po alg Schrage z przerwaniami", jobs, SchrageHeap(jobs));
 
 
     return 0;
