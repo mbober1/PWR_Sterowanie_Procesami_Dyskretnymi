@@ -101,8 +101,8 @@ void printJobsInfo(std::vector<job> jobs, int size, int seed) {
 int main() {
     int size = 10;
     int seed = 7523;
-    // std::cin >> count;
-    // std::cin >> seed;
+    std::cin >> size;
+    std::cin >> seed;
 
 
     std::vector<job> jobs = generateJobs(size, seed);
@@ -111,7 +111,7 @@ int main() {
     std::vector<Pi> pi;
     log("[Wektor] Kolejność po alg Schrage", jobs, Schrage(jobs));
     log("[Kopiec] Kolejność po alg Schrage", jobs, SchrageHeap(jobs));
-    log("[Wektor] Kolejność po alg Schrage z przerwaniami", jobs, SchrageHeap(jobs));
+    log("[Wektor] Kolejność po alg Schrage z przerwaniami", jobs, SchragePmtn(jobs));
     log("Carlier", jobs, Carlier(jobs));
 
 

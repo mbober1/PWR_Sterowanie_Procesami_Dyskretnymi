@@ -71,7 +71,7 @@ std::vector<Pi> SchragePmtn(const std::vector<job> &jobs) {
             // szukamy zadania najdluzej stygnącego
             int j = job::maxQ(G);
             // zwiększamy czas... 
-            // printf("Zaczynamy zadanie %d\n", G[j].number+1);
+            
             pi.emplace_back(t, t+G[j].p, G[j].number);
             // printf("[%d] S: %d, C: %d\n", pi[pi.size() - 1].number, pi[pi.size() - 1].s, pi[pi.size() - 1].c);
             t += G[j].p;
@@ -250,6 +250,6 @@ std::vector<Pi> Carlier(std::vector<job> jobs, std::vector<Pi> pi2 = {}, int UB 
 
     jobs[pi[c].number].q = q_bcp;
 
-    std::vector<Pi> nul;
+    std::vector<Pi> nul = SchragePmtn(jobs);
     return nul;
 }
