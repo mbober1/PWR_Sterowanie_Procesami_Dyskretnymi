@@ -25,6 +25,7 @@ class Job
 public:
     Operation op[2];
     Job(Operation op1, Operation op2);
+    Job();
     ~Job();
 };
 
@@ -34,4 +35,5 @@ Job::Job(Operation op1, Operation op2) {
     op[0] = op2;
 }
 
+Job::Job() {}
 Job::~Job() {}

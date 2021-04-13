@@ -34,6 +34,16 @@ int main() {
     
     printf("Cmax %d \n", Cemaks(J));
 
+    std::vector<Job> jason = jonson(J);
+    printf("Cmax %d \n", Cemaks(jason));
+
+
+    printf("PI: [");
+    for(int j = 0; j < jason.size(); ++j) {
+        printf("%d, ", jason[j].op[0].number);
+    }
+    printf("]");
+
     return 0;
 }
 
