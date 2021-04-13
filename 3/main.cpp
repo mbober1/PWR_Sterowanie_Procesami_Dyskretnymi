@@ -4,7 +4,7 @@
 
 #include "scheduling.hpp"
 
-std::vector<Job> generateOperations(int n, int m, int seed) {
+std::vector<Job> generateOperations(const int &n, const int &m, const int &seed) {
     RandomNumberGenerator randf(seed);
     std::vector<Job> J;
 
@@ -13,7 +13,7 @@ std::vector<Job> generateOperations(int n, int m, int seed) {
     return J;
 }
 
-int Cemaks(std::vector<Job> Pi) {
+int Cemaks(const std::vector<Job> &Pi) {
     int Cmax1 = 0;
     int Cmax2 = 0;
     printf("C: ");
@@ -27,22 +27,31 @@ int Cemaks(std::vector<Job> Pi) {
     return Cmax2;
 }
 
+void log(const char* name, const std::vector<Job> &pi) {
+    printf("%s\npi: [", name);
+
+    for(int i = 0; i < pi.size(); ++i) {
+        printf("%3d", pi[i].op[0].number);
+        if(i != pi.size() - 1) printf(", ");
+    }
+    printf("]\n");
+    printf("Cmax %d \n", Cemaks(pi));
+
+    printf("\n\n");
+
+}
+
 
 int main() {
+    int seed = 1;
+    int n = 6;
+    int m = 2;
 
-    std::vector<Job> J = generateOperations(6, 2, 1);
-    
-    printf("Cmax %d \n", Cemaks(J));
+    printf("seed: %d\nrozmiar: %dx%d\n\n", seed, n, m);
 
-    std::vector<Job> jason = jonson(J);
-    printf("Cmax %d \n", Cemaks(jason));
-
-
-    printf("PI: [");
-    for(int j = 0; j < jason.size(); ++j) {
-        printf("%d, ", jason[j].op[0].number);
-    }
-    printf("]");
+    std::vector<Job> J = generateOperations(n, m, seed);
+    log("Naturalna", J);
+    log("Jonson", jonson(J));
 
     return 0;
 }
