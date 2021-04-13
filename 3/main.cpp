@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <iostream> 
 
+#include "RandomNumberGenerator.h"
 #include "scheduling.hpp"
 
 std::vector<Job> generateOperations(const int &n, const int &m, const int &seed) {
@@ -36,9 +34,7 @@ void log(const char* name, const std::vector<Job> &pi) {
     }
     printf("]\n");
     printf("Cmax %d \n", Cemaks(pi));
-
     printf("\n\n");
-
 }
 
 
@@ -50,6 +46,7 @@ int main() {
     printf("seed: %d\nrozmiar: %dx%d\n\n", seed, n, m);
 
     std::vector<Job> J = generateOperations(n, m, seed);
+
     log("Naturalna", J);
     log("Jonson", jonson(J));
 
