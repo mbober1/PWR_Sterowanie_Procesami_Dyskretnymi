@@ -6,7 +6,11 @@ std::vector<Job> generateOperations(const int &n, const int &m, const int &seed)
     RandomNumberGenerator randf(seed);
     std::vector<Job> J;
 
-    for(int j = 1; j <= n; ++j) J.emplace_back(Operation(j, 0, randf.nextInt(1, 29), 2), Operation(j, 0, randf.nextInt(1, 29), 1));
+    for(int j = 1; j <= n; ++j) {
+        // Job* tmp = new Job(Operation(j, 0, randf.nextInt(1, 29), 2), Operation(j, 0, randf.nextInt(1, 29), 1));
+        J.emplace_back(Operation(j, 0, randf.nextInt(1, 29), 2), Operation(j, 0, randf.nextInt(1, 29), 1));
+        // J.emplace_back(tmp)
+    }
     
     return J;
 }
@@ -32,19 +36,16 @@ int main() {
     printf("seed: %d\nrozmiar: %dx%d\n\n", seed, n, m);
 
     std::vector<Job> J = generateOperations(n, m, seed);
+
     std::vector<Job*> J2;
 
     for(int i = 0; i < J.size(); ++i) {
         J2.push_back(&J[i]);
     }
 
-    // log("Naturalna", J);
-    // log("Jonson", jonson(J));
-
-    auto g = Graf<Job*>::tree(J2);
-    auto u = traverse(g);
-
-    log("BF", BruteForce(u));
+    log("Naturalna", J2);
+    // log("Jonson", Jonson(J));
+    log("BF", BruteForce(J2));
 
     return 0;
 }

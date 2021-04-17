@@ -5,17 +5,14 @@
 #include <stdio.h>
 
 
-int Cemaks(const std::vector<Job*> &Pi) {
+int Cemaks(const std::vector<Job*> &N) {
     int Cmax1 = 0;
     int Cmax2 = 0;
-    // printf("C: ");
 
-    for(int j = 0; j < Pi.size(); ++j) {
-        Cmax1 += Pi[j]->op[0].duration;
-        Cmax2 = std::max(Cmax1, Cmax2)  + Pi[j]->op[1].duration;
-        // printf("[%d, %d] ", Cmax1, Cmax2);
+    for(int j = 0; j < N.size(); ++j) {
+        Cmax1 += N[j]->op[0].duration;
+        Cmax2 = std::max(Cmax1, Cmax2)  + N[j]->op[1].duration;
     }
-    // printf("\n");
     return Cmax2;
 }
 
@@ -37,7 +34,7 @@ Job minP(std::vector<Job> &N, int *it) {
     return minJob;
 }
 
-std::vector<Job> jonson(std::vector<Job> N) {
+std::vector<Job> Jonson(std::vector<Job> N) {
     int l = 0;
     int k = N.size() - 1;
     std::vector<Job> Pi;
@@ -62,7 +59,7 @@ std::vector<Job> jonson(std::vector<Job> N) {
 // node - numer aktualnego wierzchołka
 // g - drzewo
 // values - wektor pozostałych kombinacji
-std::vector<std::vector<Job*>>traverse(Graf<Job*> &g, std::vector<std::vector<Job*>> values = {{}}, int node = 0) {
+std::vector<std::vector<Job*>>traverse(Graf<Job*> &g, const std::vector<std::vector<Job*>> values = {{}}, int node = 0) {
   if (g.adj[node].size() > 1) { // jeżeli wierzchołek ma więcej jak jednego sąsiada
     auto res = std::vector<std::vector<Job*>>(); // wektor możliwych kombinacji
 
@@ -75,6 +72,7 @@ std::vector<std::vector<Job*>>traverse(Graf<Job*> &g, std::vector<std::vector<Jo
         res[i].push_back(g.vertices[node]); // i dołącz aktualny wierzchołek
       }
     }
+
     return res;
   } else { // gdy wierzchołek ma jednego sąsiada
     Job* child = g.vertices[g.adj[node][0]]; // liść
@@ -83,9 +81,12 @@ std::vector<std::vector<Job*>>traverse(Graf<Job*> &g, std::vector<std::vector<Jo
   }
 }
 
-std::vector<Job*> BruteForce(std::vector<std::vector<Job*>> combinations) {
+std::vector<Job*> BruteForce(std::vector<Job*> N) {
     int minCmax = (1<<16); // minimalny Cmax
     std::vector<Job*>* C; // najlepsza kombinacja
+
+    auto g = Graf<Job*>::tree(N); // buduj drzewo
+    auto combinations = traverse(g); // generuj kombinacje
 
     for(int i = 0; i < combinations.size(); ++i) { // dla każdej kombinacji
         int x = Cemaks(combinations[i]); // policz Cmax
