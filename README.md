@@ -1,4 +1,4 @@
-# PWR_Sterowanie_Procesami_Dyskretnymi
+# PWR Sterowanie Procesami Dyskretnymi
 Exercise implemented during classes at the Wrocław University of Technology.
 
 Lecturer: Mgr inż. Radosław Idzikowski
