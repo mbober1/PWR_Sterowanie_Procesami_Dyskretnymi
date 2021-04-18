@@ -18,21 +18,24 @@ int Cemaks(const std::vector<Job*> &N) {
     for (int i = 0; i <= lastMachine; ++i) { // dla każdej maszyny
         for (int j = 0; j <= lastJob; ++j) { // dla każdego zadania
             int Cmax; // czas zakończenia aktualnego zadania
+            int prevCmax; // poprzednie Cmax
+            int curentMachineCmax; // obecne Cmax
+
+            int currentOpDuration = N[j]->op[i].duration; // czas trwania obecnego zadania
 
             if(i == 0) { // jeżeli to jest pierwsza maszyna
-                if(j == 0) Cmax = 0 + N[j]->op[i].duration; // jeżeli to jest pierwsze zadanie to Cmax ustawiamy na jego czas trwania
-                else Cmax = N[j-1]->op[i].end + N[j]->op[i].duration; // jeśli nie to Cmax to czas jego trwania plus koniec trwania poprzedniego
+                prevCmax = 0;
+
+                if(j == 0) Cmax = 0 + currentOpDuration; // jeżeli to jest pierwsze zadanie to Cmax ustawiamy na jego czas trwania
+                else Cmax = N[j-1]->op[i].end + currentOpDuration; // jeśli nie to Cmax to czas jego trwania plus koniec trwania poprzedniego
 
             } else { // jeżeli to nie jest pierwsza maszyna
-                int prevCmax, curentMachineCmax;
-
-                if(i == 0) prevCmax = 0; // jeżeli to jest pierwsza maszyna to prevCmax ustaw na 0
-                else prevCmax = N[j]->op[i-1].end; // jeśli nie to prevCmax ustaw na koniec tego zadania w poprzedniej maszynie
+                prevCmax = N[j]->op[i-1].end; // jeśli nie to prevCmax ustaw na koniec tego zadania w poprzedniej maszynie
 
                 if(j == 0) curentMachineCmax = 0; // jeżeli to jest pierwsze zadanie to ustaw Cmax na obecnej maszynie na 0
                 else curentMachineCmax = N[j-1]->op[i].end; // jeżeli nie to ustaw Cmax na obecnej maszynie na koniec poprzedniego zadania na tej maszynie
 
-                Cmax = std::max(prevCmax, curentMachineCmax) + N[j]->op[i].duration; // wybieraz wartość najwyższą i dodaj czas trwania obecnego zadania na obecnej maszynie 
+                Cmax = std::max(prevCmax, curentMachineCmax) + currentOpDuration; // wybieraz wartość najwyższą i dodaj czas trwania obecnego zadania na obecnej maszynie 
             }
             N[j]->op[i].end = Cmax; // ustaw czas zakończenia obecnego zadania na obecnej maszynie równy Cmax
         }
