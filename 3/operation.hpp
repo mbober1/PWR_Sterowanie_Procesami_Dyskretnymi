@@ -23,6 +23,7 @@ public:
     Job();
     ~Job();
     void addOperation(Operation tmp);
+    int last();
 };
 
 Job::Job() {}
@@ -30,4 +31,8 @@ Job::~Job() {}
 
 void Job::addOperation(Operation tmp) {
     op.push_back(tmp);
+}
+
+int Job::last() {
+    return this->op.size() - 1;
 }

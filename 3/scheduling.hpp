@@ -12,7 +12,7 @@
  * @return Zwraca czas wykonywania danej kombinacji.
  */
 int Cemaks(const std::vector<Job*> &N) {
-    int lastMachine = N[0]->op.size() - 1; // indeks ostatniej maszyny
+    int lastMachine = N[0]->last(); // indeks ostatniej maszyny
     int lastJob = N.size() - 1; // indeks ostatniego zadania
 
     for (int i = 0; i <= lastMachine; ++i) { // dla każdej maszyny
@@ -48,19 +48,28 @@ int Cemaks(const std::vector<Job*> &N) {
  * @param it Iterator najlepszej operacji.
  * @return Zwraca operację z najkrótszym czasem wykonywania.
  */
-Job* minP(std::vector<Job*> &N, int *it) {
-    Job* minJob = N[0];
+inline Job* minP(const std::vector<Job*> &N, int *it) {
+    Job* minJob = N[0]; // wskaźnik na najlepsze zadanie
     *it = 0;
-    int last = minJob->op.size()-1;
 
-    for(int i = 0; i < N.size(); ++i) {
-        if(N[i]->op[0].duration < minJob->op[0].duration && N[i]->op[0].duration < minJob->op[last].duration) {
-            minJob = N[i];
-            *it = i;
-        } 
-        if(N[i]->op[last].duration < minJob->op[0].duration && N[i]->op[last].duration < minJob->op[last].duration) {
-            minJob = N[i];
-            *it = i;
+    for(int i = 0; i < N.size(); ++i) { // dla każdego zadania
+        int currentFirst = N[i]->op[0].duration; // czas trwania obecnego zadania na pierwszej maszynie
+        int currentLast = N[i]->op[minJob->last()].duration; // czas trwania obecnego zadania na ostatniej maszynie
+        int bestFirst = minJob->op[0].duration; // czas trwania najlepszego zadania na pierwszej maszynie
+        int bestLast = minJob->op[minJob->last()].duration; // czas trwania najlepszego zadania na ostatniej maszynie
+
+        if(currentFirst < bestFirst) { // jeżeli czas na pierwszej maszynie jest mniejszy od najlepszego na pierwszej
+            if (currentFirst < bestLast) { // jeżeli czas na pierwszej maszynie jest mniejszy od ostatniego na ostatniej
+                minJob = N[i]; // ustaw tej jako najlepszy
+                *it = i; // ustaw iterator na niego
+            }
+        }
+
+        if(currentLast < bestFirst) { // jeżeli czas na ostatniej maszynie jest mniejszy od najlepszego na pierwszej
+            if(currentLast < bestLast) { // jeżeli czas na ostatniej jest mniejszy od najlepszego na ostatniej
+                minJob = N[i]; // ustaw tej jako najlepszy
+                *it = i; // ustaw iterator na niego
+            }
         }
     }
     return minJob;
