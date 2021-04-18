@@ -33,13 +33,14 @@ int Cemaks(const std::vector<Job*> &N) {
 Job* minP(std::vector<Job*> &N, int *it) {
     Job* minJob = N[0];
     *it = 0;
+    int last = minJob->op.size()-1;
 
     for(int i = 0; i < N.size(); ++i) {
-        if(N[i]->op[0].duration < minJob->op[0].duration && N[i]->op[0].duration < minJob->op[1].duration) {
+        if(N[i]->op[0].duration < minJob->op[0].duration && N[i]->op[0].duration < minJob->op[last].duration) {
             minJob = N[i];
             *it = i;
         } 
-        if(N[i]->op[1].duration < minJob->op[0].duration && N[i]->op[1].duration < minJob->op[1].duration) {
+        if(N[i]->op[last].duration < minJob->op[0].duration && N[i]->op[last].duration < minJob->op[last].duration) {
             minJob = N[i];
             *it = i;
         }
@@ -63,7 +64,7 @@ std::vector<Job*> Jonson(std::vector<Job*> N) {
     while(!N.empty()) {
         int it;
         Job* minJob = minP(N, &it);
-        if(minJob->op[0].duration < minJob->op[1].duration) {
+        if(minJob->op[0].duration < minJob->op[minJob->op.size()-1].duration) {
             Pi.at(l++) = minJob;
         } else {
             Pi.at(k--) = minJob;

@@ -46,8 +46,8 @@ void log(const char* name, const std::vector<Job*> &pi) {
 
 
 int main() {
-    int seed = 1;
-    int n = 6;
+    int seed = 32565;
+    int n = 8;
     int m = 2;
 
     printf("seed: %d\nrozmiar: %dx%d\n\n", seed, n, m);
