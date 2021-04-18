@@ -17,7 +17,7 @@ std::vector<Job*> generateOperations(const int &n, const int &m, const int &seed
     for(int j = 1; j <= n; ++j) {
         Job* tmp = new Job();
         for(int i = 1; i <= m; ++i) {
-            tmp->addOperation(Operation(j, 0, randf.nextInt(1, 29), i));
+            tmp->addOperation(Operation(j, randf.nextInt(1, 29)));
         }
         J.push_back(tmp);
     }
@@ -46,9 +46,9 @@ void log(const char* name, const std::vector<Job*> &pi) {
 
 
 int main() {
-    int seed = 32565;
-    int n = 8;
-    int m = 2;
+    int seed = 751;
+    int n = 7;
+    int m = 3;
 
     printf("seed: %d\nrozmiar: %dx%d\n\n", seed, n, m);
 
@@ -57,6 +57,7 @@ int main() {
     log("Naturalna", J);
     log("Jonson", Jonson(J));
     log("BruteForce", BruteForce(J));
+    log("BnB", InitBranchAndBound(J));
 
     return 0;
 }

@@ -12,14 +12,32 @@
  * @return Zwraca czas wykonywania danej kombinacji.
  */
 int Cemaks(const std::vector<Job*> &N) {
-    int Cmax1 = 0;
-    int Cmax2 = 0;
+    int lastMachine = N[0]->op.size() - 1; // indeks ostatniej maszyny
+    int lastJob = N.size() - 1; // indeks ostatniego zadania
 
-    for(int j = 0; j < N.size(); ++j) {
-        Cmax1 += N[j]->op[0].duration;
-        Cmax2 = std::max(Cmax1, Cmax2)  + N[j]->op[1].duration;
+    for (int i = 0; i <= lastMachine; ++i) { // dla każdej maszyny
+        for (int j = 0; j <= lastJob; ++j) { // dla każdego zadania
+            int Cmax;
+
+            if(i == 0) { // jeżeli to jest pierwsza maszyna
+                if(j == 0) Cmax = 0 + N[j]->op[i].duration; // jeżeli to jest pierwsze zadanie to Cmax ustawiamy na jego czas trwania
+                else Cmax = N[j-1]->op[i].end + N[j]->op[i].duration; // jeśli nie to Cmax to czas jego trwania plus koniec trwania poprzedniego
+
+            } else { // jeżeli to nie jest pierwsza maszyna
+                int prevCmax, curentMachineCmax;
+
+                if(i == 0) prevCmax = 0; // jeżeli to jest pierwsza maszyna to prevCmax ustaw na 0
+                else prevCmax = N[j]->op[i-1].end; // jeśli nie to prevCmax ustaw na koniec tego zadania w poprzedniej maszynie
+
+                if(j == 0) curentMachineCmax = 0; // jeżeli to jest pierwsze zadanie to ustaw Cmax na obecnej maszynie na 0
+                else curentMachineCmax = N[j-1]->op[i].end; // jeżeli nie to ustaw Cmax na obecnej maszynie na koniec poprzedniego zadania na tej maszynie
+
+                Cmax = std::max(prevCmax, curentMachineCmax) + N[j]->op[i].duration; // wybieraz wartość najwyższą i dodaj czas trwania obecnego zadania na obecnej maszynie 
+            }
+            N[j]->op[i].end = Cmax; // ustaw czas zakończenia obecnego zadania na obecnej maszynie równy Cmax
+        }
     }
-    return Cmax2;
+    return N[lastJob]->op[lastMachine].end; // ostatnie zadanie z ostatniej maszyny
 }
 
 
@@ -56,20 +74,20 @@ Job* minP(std::vector<Job*> &N, int *it) {
  * @return Zwraca najlepszą kombinację.
  */
 std::vector<Job*> Jonson(std::vector<Job*> N) {
-    int l = 0;
-    int k = N.size() - 1;
+    int l = 0; // indeks na początek listy zadań
+    int k = N.size() - 1; // indeks na koniec listy zadań
     std::vector<Job*> Pi;
     Pi.resize(N.size());
 
-    while(!N.empty()) {
-        int it;
-        Job* minJob = minP(N, &it);
-        if(minJob->op[0].duration < minJob->op[minJob->op.size()-1].duration) {
-            Pi.at(l++) = minJob;
-        } else {
-            Pi.at(k--) = minJob;
+    while(!N.empty()) { // dopuki są jakieś nieprzypisane zadania
+        int it; 
+        Job* minJob = minP(N, &it); // szukaj zadania z najkrótszym czasem trwania
+        if(minJob->op[0].duration < minJob->op[minJob->op.size()-1].duration) { // jeżeli wyjkonuje się krócej na pierwszej maszynie
+            Pi.at(l++) = minJob; // dopisz go od początku
+        } else { // a jak nie
+            Pi.at(k--) = minJob; // dopisz go od końca
         }
-        N.erase(N.begin() + it);
+        N.erase(N.begin() + it); // usuń z nieuszeregowanych
     }
 
     return Pi;
@@ -129,4 +147,66 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
         }
     }
     return *Pi;
+}
+
+
+
+
+int lowerBound(std::vector<Job*> N, std::vector<Job*> *Pi) {
+    int lb = 0;
+    Cemaks(*Pi);
+
+    for (int i = 0; i < N[0]->op.size(); i++) {
+        int sum = 0;
+        for (int j = 0; j < N.size(); j++) {
+            sum += N[j]->op[i].duration;
+        }
+        lb = std::max((*Pi)[Pi->size() - 1]->op[i].end + sum, lb);
+    }
+    return lb;
+}
+
+
+
+/**
+ * Algorytm przeszukiwaina siłowego.
+ *
+ * @param N Wektor operacji.
+ * @return Zwraca najlepszą kombinację.
+ */
+void BranchAndBound(int j, std::vector<Job*> N, std::vector<Job*> *result, int ub, std::vector<Job*> Pi = {}) {
+    Pi.push_back(N[j]); // dodaj 
+    N.erase(N.begin() + j);
+    
+    if(!N.empty()) {
+        int lb = lowerBound(N, &Pi);
+        if(lb < ub) {
+            for (int i = 0; i < N.size(); i++) {
+                BranchAndBound(i, N, result, ub, Pi);
+            }
+        }
+    } else {
+        int Cmax = Cemaks(Pi);
+        if(Cmax < ub) {
+            ub = Cmax;
+            *result = Pi;
+        }
+    }
+}
+
+
+/**
+ * Algorytm przeszukiwaina siłowego.
+ *
+ * @param N Wektor operacji.
+ * @return Zwraca najlepszą kombinację.
+ */
+std::vector<Job*> InitBranchAndBound(std::vector<Job*> N) {
+    int ub = Cemaks(Jonson(N)); // górne oszacowanie
+    std::vector<Job*> Pi;
+
+    for(int j = 0; j < N.size(); ++j) { // dla każdego zadania
+        BranchAndBound(j, N, &Pi, ub); // wykonaj BnB
+    }
+    return Pi;
 }

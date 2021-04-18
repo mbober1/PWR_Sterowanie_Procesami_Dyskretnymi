@@ -3,19 +3,15 @@ class Operation
 public:
 
     int number; //numer zadania
-    int start; //czas rozpoczęcia
     int duration; //czas trwania
-    int machine; //numer maszyny
+    int end; //czas zakończenia
 
-    Operation(int number, int start, int duration, int machine);
+    Operation(int number, int duration);
     Operation();
     ~Operation();
 };
 
-Operation::Operation(int number, int start, int duration, int machine) 
-: number(number), start(start), duration(duration), machine(machine) {}
-
-
+Operation::Operation(int number, int duration) : number(number), duration(duration) {}
 Operation::Operation() {}
 Operation::~Operation() {}
 
