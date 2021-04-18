@@ -17,7 +17,7 @@ int Cemaks(const std::vector<Job*> &N) {
 
     for (int i = 0; i <= lastMachine; ++i) { // dla każdej maszyny
         for (int j = 0; j <= lastJob; ++j) { // dla każdego zadania
-            int Cmax;
+            int Cmax; // czas zakończenia aktualnego zadania
 
             if(i == 0) { // jeżeli to jest pierwsza maszyna
                 if(j == 0) Cmax = 0 + N[j]->op[i].duration; // jeżeli to jest pierwsze zadanie to Cmax ustawiamy na jego czas trwania
@@ -88,7 +88,7 @@ std::vector<Job*> Jonson(std::vector<Job*> N) {
     std::vector<Job*> Pi;
     Pi.resize(N.size());
 
-    while(!N.empty()) { // dopuki są jakieś nieprzypisane zadania
+    while(!N.empty()) { // dopóki są jakieś nieprzypisane zadania
         int it; 
         Job* minJob = minP(N, &it); // szukaj zadania z najkrótszym czasem trwania
         if(minJob->op[0].duration < minJob->op[minJob->op.size()-1].duration) { // jeżeli wyjkonuje się krócej na pierwszej maszynie
@@ -178,7 +178,7 @@ int lowerBound(std::vector<Job*> N, std::vector<Job*> *Pi) {
 
 
 /**
- * Algorytm przeszukiwaina siłowego.
+ * Algorytm podziału i ograniczeń.
  *
  * @param N Wektor operacji.
  * @return Zwraca najlepszą kombinację.
@@ -187,7 +187,7 @@ void BranchAndBound(int j, std::vector<Job*> N, std::vector<Job*> *result, int u
     Pi.push_back(N[j]); // dodaj 
     N.erase(N.begin() + j);
     
-    if(!N.empty()) {
+    if(!N.empty()) { // jeśli są jakieś
         int lb = lowerBound(N, &Pi);
         if(lb < ub) {
             for (int i = 0; i < N.size(); i++) {
@@ -210,9 +210,9 @@ void BranchAndBound(int j, std::vector<Job*> N, std::vector<Job*> *result, int u
  * @param N Wektor operacji.
  * @return Zwraca najlepszą kombinację.
  */
-std::vector<Job*> InitBranchAndBound(std::vector<Job*> N) {
+std::vector<Job*> initBranchAndBound(std::vector<Job*> N) {
     int ub = Cemaks(Jonson(N)); // górne oszacowanie
-    std::vector<Job*> Pi;
+    std::vector<Job*> Pi; // wektor wynikowy
 
     for(int j = 0; j < N.size(); ++j) { // dla każdego zadania
         BranchAndBound(j, N, &Pi, ub); // wykonaj BnB

@@ -57,7 +57,7 @@ int main() {
     log("Naturalna", J);
     log("Jonson", Jonson(J));
     log("BruteForce", BruteForce(J));
-    log("BnB", InitBranchAndBound(J));
+    log("BnB", initBranchAndBound(J));
 
     return 0;
 }
