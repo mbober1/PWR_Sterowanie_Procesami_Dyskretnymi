@@ -5,6 +5,12 @@
 #include <stdio.h>
 
 
+/**
+ * Wylicza czas wykonywania danej kombinacji.
+ *
+ * @param N Wektor operacji.
+ * @return Zwraca czas wykonywania danej kombinacji.
+ */
 int Cemaks(const std::vector<Job*> &N) {
     int Cmax1 = 0;
     int Cmax2 = 0;
@@ -117,8 +123,8 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
     for(int i = 0; i < combinations.size(); ++i) { // dla każdej kombinacji
         int x = Cemaks(combinations[i]); // policz Cmax
         if(x < minCmax) { // jeżeli okaże się najlepsza
-            minCmax = x; // zapis Cmaks
-            Pi = &(combinations[i]); // najlepszą kombinację
+            minCmax = x; // zapisz Cmaks
+            Pi = &(combinations[i]); // i najlepszą kombinację
         }
     }
     return *Pi;

@@ -2,6 +2,14 @@
 #include "RandomNumberGenerator.h"
 #include "scheduling.hpp"
 
+
+/**
+ * Generuje dane.
+ *
+ * @param n Ilość zadań.
+ * @param m Ilość maszyn.
+ * @return Zwraca nieuporządkowane zadania.
+ */
 std::vector<Job> generateOperations(const int &n, const int &m, const int &seed) {
     RandomNumberGenerator randf(seed);
     std::vector<Job> J;
@@ -15,6 +23,14 @@ std::vector<Job> generateOperations(const int &n, const int &m, const int &seed)
     return J;
 }
 
+
+
+/**
+ * Wypisywanie raportu.
+ *
+ * @param name Nazwa zadania.
+ * @param pi Wektor z uporządkowanymi zadaniami.
+ */
 void log(const char* name, const std::vector<Job*> &pi) {
     printf("%s\npi: [", name);
 
@@ -45,7 +61,7 @@ int main() {
 
     log("Naturalna", J2);
     // log("Jonson", Jonson(J));
-    log("BF", BruteForce(J2));
+    log("BruteForce", BruteForce(J2));
 
     return 0;
 }
