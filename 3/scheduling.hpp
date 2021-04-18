@@ -164,16 +164,24 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
 
 
 
+/**
+ * Dolne ograniczenie.
+ *
+ * @param N Wektor operacji.
+ * @param Pi Wektor kolejności.
+ * @return Wartość dolnego ograniczenia.
+ */
 int lowerBound(std::vector<Job*> N, std::vector<Job*> *Pi) {
-    int lb = 0;
-    Cemaks(*Pi);
+    int lb = 0; // najlepsze dolne ograniczenie
+    Cemaks(*Pi); // ustaw czasy zakończenia
 
-    for (int i = 0; i < N[0]->op.size(); i++) {
-        int sum = 0;
-        for (int j = 0; j < N.size(); j++) {
-            sum += N[j]->op[i].duration;
+    for (int i = 0; i <= N[0]->last(); i++) { // dla każdej maszyny
+        int sum = 0; // suma 
+        for (int j = 0; j < N.size(); j++) { // dla każdego zadania
+            sum += N[j]->op[i].duration; // sumuj czasy wykonania
         }
-        lb = std::max((*Pi)[Pi->size() - 1]->op[i].end + sum, lb);
+        int lastEnd = (*Pi)[Pi->size() - 1]->op[i].end; // czas zakończenia zadania na ostatnim 
+        lb = std::max(lastEnd + sum, lb); // wybierz największy
     }
     return lb;
 }
@@ -183,32 +191,35 @@ int lowerBound(std::vector<Job*> N, std::vector<Job*> *Pi) {
 /**
  * Algorytm podziału i ograniczeń.
  *
- * @param N Wektor operacji.
- * @return Zwraca najlepszą kombinację.
+ * @param j Numer zadania.
+ * @param N Wektor operacji nieuszeregowanych.
+ * @param result Wektor najlepszej kolejności.
+ * @param ub Dolne ograniczenie.
+ * @param Pi Wektor kolejności.
  */
 void BranchAndBound(int j, std::vector<Job*> N, std::vector<Job*> *result, int ub, std::vector<Job*> Pi = {}) {
-    Pi.push_back(N[j]); // dodaj 
-    N.erase(N.begin() + j);
+    Pi.push_back(N[j]); // dodaj joty na początek
+    N.erase(N.begin() + j); // usuń joty element z wektora nieuszeregowanych
     
     if(!N.empty()) { // jeśli są jakieś
-        int lb = lowerBound(N, &Pi);
-        if(lb < ub) {
-            for (int i = 0; i < N.size(); i++) {
-                BranchAndBound(i, N, result, ub, Pi);
+        int lb = lowerBound(N, &Pi); // policz dolne ograniczenie
+        if(lb < ub) { // jeżeli dolne ograniczenie mniejsze od górnego
+            for (int i = 0; i < N.size(); i++) { // dla wszystkich zadań
+                BranchAndBound(i, N, result, ub, Pi); // wykonaj BnB
             }
         }
-    } else {
-        int Cmax = Cemaks(Pi);
-        if(Cmax < ub) {
-            ub = Cmax;
-            *result = Pi;
+    } else { // jeśli nie ma nieuszeregowanych
+        int Cmax = Cemaks(Pi); // policz Cmax dla przygotowanej kolejności
+        if(Cmax < ub) { // jelśli okaże sie mniejszy od górnego oszacowania 
+            ub = Cmax; // skoryguj ograniczenie
+            *result = Pi; // zapisz sobie tą kolejność
         }
     }
 }
 
 
 /**
- * Algorytm przeszukiwaina siłowego.
+ * Inicjacja algorytmu podziału i ograniczeń.
  *
  * @param N Wektor operacji.
  * @return Zwraca najlepszą kombinację.
