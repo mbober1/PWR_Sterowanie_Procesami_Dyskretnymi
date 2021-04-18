@@ -23,17 +23,15 @@ Operation::~Operation() {}
 class Job
 {
 public:
-    Operation op[2];
-    Job(Operation op1, Operation op2);
+    std::vector<Operation>op;
     Job();
     ~Job();
+    void addOperation(Operation tmp);
 };
-
-
-Job::Job(Operation op1, Operation op2) {
-    op[1] = op1;
-    op[0] = op2;
-}
 
 Job::Job() {}
 Job::~Job() {}
+
+void Job::addOperation(Operation tmp) {
+    op.push_back(tmp);
+}

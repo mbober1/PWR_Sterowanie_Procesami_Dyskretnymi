@@ -15,13 +15,12 @@ std::vector<Job*> generateOperations(const int &n, const int &m, const int &seed
     std::vector<Job*> J;
 
     for(int j = 1; j <= n; ++j) {
-        auto a = Operation(j, 0, randf.nextInt(1, 29), 1);
-        auto b = Operation(j, 0, randf.nextInt(1, 29), 2);
-
-        Job* tmp = new Job(b, a);
+        Job* tmp = new Job();
+        for(int i = 1; i <= m; ++i) {
+            tmp->addOperation(Operation(j, 0, randf.nextInt(1, 29), i));
+        }
         J.push_back(tmp);
     }
-    
     return J;
 }
 
@@ -56,7 +55,7 @@ int main() {
     std::vector<Job*> J = generateOperations(n, m, seed);
 
     log("Naturalna", J);
-    // log("Jonson", Jonson(J));
+    log("Jonson", Jonson(J));
     log("BruteForce", BruteForce(J));
 
     return 0;
