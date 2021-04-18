@@ -17,6 +17,13 @@ int Cemaks(const std::vector<Job*> &N) {
 }
 
 
+/**
+ * Szukanie najmniejszego czasu wykonywania.
+ *
+ * @param N Wektor operacji.
+ * @param it Iterator najlepszej operacji.
+ * @return Zwraca operację z najkrótszym czasem wykonywania.
+ */
 Job minP(std::vector<Job> &N, int *it) {
     Job minJob = N[0];
     *it = 0;
@@ -34,6 +41,13 @@ Job minP(std::vector<Job> &N, int *it) {
     return minJob;
 }
 
+
+/**
+ * Algorytm Jonson.
+ *
+ * @param N Wektor operacji.
+ * @return Zwraca najlepszą kombinację.
+ */
 std::vector<Job> Jonson(std::vector<Job> N) {
     int l = 0;
     int k = N.size() - 1;
@@ -48,7 +62,6 @@ std::vector<Job> Jonson(std::vector<Job> N) {
         } else {
             Pi.at(k--) = minJob;
         }
-        fflush(stdout);
         N.erase(N.begin() + it);
     }
 
@@ -56,34 +69,47 @@ std::vector<Job> Jonson(std::vector<Job> N) {
 }   
 
 
-// node - numer aktualnego wierzchołka
-// g - drzewo
-// values - wektor pozostałych kombinacji
-std::vector<std::vector<Job*>>traverse(Graf<Job*> &g, const std::vector<std::vector<Job*>> values = {{}}, int node = 0) {
-  if (g.adj[node].size() > 1) { // jeżeli wierzchołek ma więcej jak jednego sąsiada
+/**
+ * Przeszukuje graf rekurencyjnie.
+ *
+ * @param graph Graf z danymi.
+ * @param values Wektor pozostałych kombinacji.
+ * @param node Numer aktualnego wierzchołka.
+ * @return Zwraca wszystkie możliwe kombinacje.
+ */
+std::vector<std::vector<Job*>>traverse(Graf<Job*> &graph, const std::vector<std::vector<Job*>> values = {{}}, int node = 0) {
+  if (graph.adj[node].size() > 1) { // jeżeli wierzchołek ma więcej jak jednego sąsiada
     auto res = std::vector<std::vector<Job*>>(); // wektor możliwych kombinacji
 
-    for (auto i = g.adj[node].begin(); i != g.adj[node].end(); ++i) { // dla każdego dziecka
-      auto x = traverse(g, values, *i); // wywołaj się rekurencyjnie
+    for (auto i = graph.adj[node].begin(); i != graph.adj[node].end(); ++i) { // dla każdego dziecka
+      auto x = traverse(graph, values, *i); // wywołaj się rekurencyjnie
       res.insert(res.end(), x.begin(), x.end()); // dołącz do możliwych kombinacji 
     }
     if (node != 0) { // jeśli nie jesteśmy zerem (korzeniem)
       for (int i = 0; i < res.size(); ++i) { // przejdż po każdej kombinacji
-        res[i].push_back(g.vertices[node]); // i dołącz aktualny wierzchołek
+        res[i].push_back(graph.vertices[node]); // i dołącz aktualny wierzchołek
       }
     }
 
     return res;
   } else { // gdy wierzchołek ma jednego sąsiada
-    Job* child = g.vertices[g.adj[node][0]]; // liść
-    Job* parent = g.vertices[node]; // przedostatni element
+    Job* child = graph.vertices[graph.adj[node][0]]; // liść
+    Job* parent = graph.vertices[node]; // przedostatni element
     return {{child, parent}};
   }
 }
 
+
+
+/**
+ * Algorytm przeszukiwaina siłowego.
+ *
+ * @param N Wektor operacji.
+ * @return Zwraca najlepszą kombinację.
+ */
 std::vector<Job*> BruteForce(std::vector<Job*> N) {
     int minCmax = (1<<16); // minimalny Cmax
-    std::vector<Job*>* C; // najlepsza kombinacja
+    std::vector<Job*>* Pi; // najlepsza kombinacja
 
     auto g = Graf<Job*>::tree(N); // buduj drzewo
     auto combinations = traverse(g); // generuj kombinacje
@@ -92,8 +118,8 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
         int x = Cemaks(combinations[i]); // policz Cmax
         if(x < minCmax) { // jeżeli okaże się najlepsza
             minCmax = x; // zapis Cmaks
-            C = &(combinations[i]); // najlepszą kombinację
+            Pi = &(combinations[i]); // najlepszą kombinację
         }
     }
-    return *C;
+    return *Pi;
 }
