@@ -10,14 +10,16 @@
  * @param m Ilość maszyn.
  * @return Zwraca nieuporządkowane zadania.
  */
-std::vector<Job> generateOperations(const int &n, const int &m, const int &seed) {
+std::vector<Job*> generateOperations(const int &n, const int &m, const int &seed) {
     RandomNumberGenerator randf(seed);
-    std::vector<Job> J;
+    std::vector<Job*> J;
 
     for(int j = 1; j <= n; ++j) {
-        // Job* tmp = new Job(Operation(j, 0, randf.nextInt(1, 29), 2), Operation(j, 0, randf.nextInt(1, 29), 1));
-        J.emplace_back(Operation(j, 0, randf.nextInt(1, 29), 2), Operation(j, 0, randf.nextInt(1, 29), 1));
-        // J.emplace_back(tmp)
+        auto a = Operation(j, 0, randf.nextInt(1, 29), 1);
+        auto b = Operation(j, 0, randf.nextInt(1, 29), 2);
+
+        Job* tmp = new Job(b, a);
+        J.push_back(tmp);
     }
     
     return J;
@@ -51,17 +53,11 @@ int main() {
 
     printf("seed: %d\nrozmiar: %dx%d\n\n", seed, n, m);
 
-    std::vector<Job> J = generateOperations(n, m, seed);
+    std::vector<Job*> J = generateOperations(n, m, seed);
 
-    std::vector<Job*> J2;
-
-    for(int i = 0; i < J.size(); ++i) {
-        J2.push_back(&J[i]);
-    }
-
-    log("Naturalna", J2);
+    log("Naturalna", J);
     // log("Jonson", Jonson(J));
-    log("BruteForce", BruteForce(J2));
+    log("BruteForce", BruteForce(J));
 
     return 0;
 }
