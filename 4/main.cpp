@@ -46,49 +46,53 @@ std::vector<Job*> generateOperations(const int &n, const int &seed) {
  * @param pi Wektor z uporządkowanymi zadaniami.
  */
 void log(const char* name, const std::vector<Job*> &pi) {
-    int C[pi.size()] = {};
-    int T[pi.size()] = {};
+    int size = pi.size();
+    int *C = new int[size];
+    int *T = new int[size];
 
     printf("%s\npi: [", name);
-    for(int i = 0; i < pi.size(); ++i) {
+    for(int i = 0; i < size; ++i) {
         printf("%3d", pi[i]->number);
 
-        if(i != pi.size() - 1) printf(", ");
+        if(i != size - 1) printf(", ");
     }
     printf("]\n");
 
 
     printf("C:  [");
-    for(int i = 0; i < pi.size(); ++i) {
+    for(int i = 0; i < size; ++i) {
         if(i) C[i] = C[i-1] + pi[i]->processingTime;
         else C[i] = pi[i]->processingTime;
         
         printf("%3d", C[i]);
-        if(i != pi.size() - 1) printf(", ");
+        if(i != size - 1) printf(", ");
     }
     printf("]\n");
 
 
     printf("T:  [");
-    for(int i = 0; i < pi.size(); ++i) {
+    for(int i = 0; i < size; ++i) {
         T[i] = std::max(C[i] - pi[i]->deadline, 0);
         printf("%3d", T[i]);
-        if(i != pi.size() - 1) printf(", ");
+        if(i != size - 1) printf(", ");
     }
     printf("]\n");
 
     printf("wT: [");
     int wiTi = 0;
-    for(int i = 0; i < pi.size(); ++i) {
+    for(int i = 0; i < size; ++i) {
         int wT = T[i] * pi[i]->weight;
         wiTi += wT;
         printf("%3d", wT);
-        if(i != pi.size() - 1) printf(", ");
+        if(i != size - 1) printf(", ");
     }
     printf("]\n");
 
 
-    printf("wiTi sum: %d\n\n", wiTi);
+    printf("wiTi: %d\n\n", wiTi);
+
+    // delete[] C;
+    // delete[] T;
 }
 
 
@@ -102,8 +106,9 @@ int main() {
 
     log("Naturalna", J);
     log("Greedy", Greedy(J));
-    // log("BruteForce", BruteForce(J));
-    // log("BnB", initBranchAndBound(J));
+    log("BruteForce", BruteForce(J));
+    // log("Dynamic", Dynamic(J));
+    Dynamic(J);
 
     return 0;
 }
