@@ -105,8 +105,13 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
  */
 std::vector<Job*> Dynamic(std::vector<Job*> N) {
     int size = N.size();
-    int memory[size];
-    std::memset(memory, -1, size);
+    int memSize = 1<<size;
+    int memory[memSize];
+    
+    for (size_t i = 0; i < memSize; i++) memory[i] = -1;
+    
+
+    
 
     // printf("%d %d", memory[0], memory[N.size()-1]);
 
