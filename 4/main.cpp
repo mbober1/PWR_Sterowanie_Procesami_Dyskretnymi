@@ -101,7 +101,7 @@ int main() {
     std::vector<Job*> J = generateOperations(n, seed);
 
     log("Naturalna", J);
-    // log("Jonson", Jonson(J));
+    log("Greedy", Greedy(J));
     // log("BruteForce", BruteForce(J));
     // log("BnB", initBranchAndBound(J));
 
