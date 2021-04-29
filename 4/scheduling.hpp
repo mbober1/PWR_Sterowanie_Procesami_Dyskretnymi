@@ -3,6 +3,8 @@
 #include "graf.hpp"
 #include <stdio.h>
 #include <cstring>
+#include <bitset>
+#include <iostream>
 
 inline bool minDead(const Job* i, const Job* j) { return(i->deadline < j->deadline); }
 
@@ -109,11 +111,35 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
     int memory[memSize];
     
     for (size_t i = 0; i < memSize; i++) memory[i] = -1;
+
+    auto g = Graf<Job*>::tree(N); // buduj drzewo
+    auto combinations = traverse(g); // generuj kombinacje
+
+    for(int i = 0; i < combinations.size(); ++i) { // dla każdej kombinacji
+        int combinationSize = combinations[i].size(); // tyle jest zadań w kombinacji
+        std::bitset<8> tmp(0); 
+
+        for (size_t j = 0; j < combinationSize; j++) 
+        {
+            int dupa = combinations[i][j]->number - 1;
+            tmp |= 1<<(dupa);
+            std::cout << dupa << "|" << tmp << std::endl;
+        }
+
+        unsigned long idx = tmp.to_ulong();
+        // std::cout << tmp << "=" << idx << std::endl;
+
+        if(memory[idx] == -1) {
+            printf("policz %d\n", idx);
+            memory[idx] = 7;
+        } else {
+            // printf("%d już policzone\n", idx);
+        }
+        
+        
+
+    }
     
-
-    
-
-    // printf("%d %d", memory[0], memory[N.size()-1]);
-
+    return combinations[0];
 
 }
