@@ -107,8 +107,8 @@ int main() {
     log("Naturalna", J);
     log("Greedy", Greedy(J));
     log("BruteForce", BruteForce(J));
-    // log("Dynamic", Dynamic(J));
-    Dynamic(J);
+    log("Dynamic", Dynamic(J));
+    // Dynamic(J);
 
     return 0;
 }

@@ -6,6 +6,14 @@
 #include <bitset>
 #include <iostream>
 
+
+/**
+ * Wybierz najmniejszy deadline.
+ *
+ * @param i Zadanie pierwsze.
+ * @param i Zadanie drugie.
+ * @return Zwraca TRUE gdy zadanie pierwsze ma mniejszy deadline.
+ */
 inline bool minDead(const Job* i, const Job* j) { return(i->deadline < j->deadline); }
 
 
@@ -19,7 +27,6 @@ std::vector<Job*> Greedy(std::vector<Job*> N) {
     std::sort(N.begin(), N.end(), minDead);
     return N;
 }
-
 
 
 /**
@@ -53,22 +60,28 @@ std::vector<std::vector<Job*>>traverse(Graf<Job*> &graph, const std::vector<std:
 }
 
 
+/**
+ * Policz karę dla podanej kombinacji.
+ *
+ * @param pi Wektor operacji.
+ * @return Zwraca najlepszą kombinację.
+ */
 int penaltyCounter(const std::vector<Job*> &pi) {
-    int size = pi.size();
-    int *C = new int[size];
-    int *T = new int[size];
-    int wiTi = 0;
+    int size = pi.size(); // ilość zadań
+    int *C = new int[size]; // tablica z czasami zakończenia
+    int *T = new int[size]; // tablica z opóźnieniami
+    int wiTi = 0; // kara ostateczna
 
-    for(int i = 0; i < size; ++i) {
-        if(i) C[i] = C[i-1] + pi[i]->processingTime;
-        else C[i] = pi[i]->processingTime;
+    for(int i = 0; i < size; ++i) { // dla każego zadania
+        if(i) C[i] = C[i-1] + pi[i]->processingTime; // policz czas zakończenia
+        else C[i] = pi[i]->processingTime; // policz czas zakończenia 
 
-        T[i] = std::max(C[i] - pi[i]->deadline, 0);
-        wiTi += T[i] * pi[i]->weight;
+        T[i] = std::max(C[i] - pi[i]->deadline, 0); // policz spóżnienia
+        wiTi += T[i] * pi[i]->weight; // dodaj do ostatecznego wyniku
     }
 
-    delete[] C;
-    delete[] T;
+    delete[] C; // usuwanko
+    delete[] T; // usuwanko
     return wiTi;
 }
 
@@ -87,16 +100,14 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
     auto combinations = traverse(g); // generuj kombinacje
 
     for(int i = 0; i < combinations.size(); ++i) { // dla każdej kombinacji
-        int tmp = penaltyCounter(combinations[i]); // policz Cmax
-        if(tmp < wiTi) { // jeżeli okaże się najlepsza
-            wiTi = tmp; // zapisz Cmaks
+        int tmp = penaltyCounter(combinations[i]); // policz karę
+        if(tmp < wiTi) { // jeżeli okaże się najmniejsza
+            wiTi = tmp; // zapisz karę
             Pi = &(combinations[i]); // i najlepszą kombinację
         }
     }
     return *Pi;
 }
-
-
 
 
 /**
@@ -123,7 +134,7 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
         {
             int dupa = combinations[i][j]->number - 1;
             tmp |= 1<<(dupa);
-            std::cout << dupa << "|" << tmp << std::endl;
+            // std::cout << dupa << "|" << tmp << std::endl;
         }
 
         unsigned long idx = tmp.to_ulong();
