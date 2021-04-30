@@ -145,17 +145,18 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
 
         for (size_t j = 0; j < tmp.size(); j++)
         {
-            int dupa = sum - tmp[j]->deadline;
-            int max = std::max(dupa, 0);
+            int T = sum - tmp[j]->deadline;
+            if(T<0) T = 0;
+            int max = std::max(T, 0);
             std::bitset<8> prev(i);
             std::cout << prev << std::endl;
             prev.reset(tmp[j]->number-1);
             int min = std::min(max * tmp[j]->weight + memory[prev.to_ulong()], result);
             if(min < result) {
-                idx = j;
+                idx = tmp[j]->number;
                 result = min;
             }
-            printf("T: %d, W: %d, F(%d): %d, MAX: %d, result: %d, idx: %d\n", dupa, tmp[j]->weight, prev.to_ulong(), memory[prev.to_ulong()], max, result, idx);
+            printf("T: %d, W: %d, F(%d): %d, MAX: %d, result: %d, idx: %d\n", T, tmp[j]->weight, prev.to_ulong(), memory[prev.to_ulong()], max, result, idx);
         }
 
         memory[i] = result;
