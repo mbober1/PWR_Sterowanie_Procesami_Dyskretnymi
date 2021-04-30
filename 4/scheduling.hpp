@@ -120,6 +120,8 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
     int size = N.size();
     int memSize = 1<<size;
     int memory[memSize];
+    int idx = 0;
+    std::vector<Job*> J;
 
     memory[0] = 0;
     
@@ -129,7 +131,6 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
         std::vector<Job*> tmp;
         int sum = 0;
         int result = 1<<16;
-        int idx = 0;
 
         printf("\n Numer %d, Zadania: ", i);
         for (size_t j = 0; j < 8; j++) 
@@ -140,7 +141,7 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
                 sum += N[j]->processingTime;
             }
         }
-        printf("\nSuma wykonywania %d\n", sum);
+        // printf("\nSuma wykonywania %d\n", sum);
 
 
         for (size_t j = 0; j < tmp.size(); j++)
@@ -149,11 +150,12 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
             if(T<0) T = 0;
             int max = std::max(T, 0);
             std::bitset<8> prev(i);
-            std::cout << prev << std::endl;
+            // std::cout << prev << std::endl;
             prev.reset(tmp[j]->number-1);
             int min = std::min(max * tmp[j]->weight + memory[prev.to_ulong()], result);
             if(min < result) {
                 idx = tmp[j]->number;
+                J.push_back(tmp[j]);
                 result = min;
             }
             printf("T: %d, W: %d, F(%d): %d, MAX: %d, result: %d, idx: %d\n", T, tmp[j]->weight, prev.to_ulong(), memory[prev.to_ulong()], max, result, idx);
@@ -165,29 +167,14 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
     }
     
     printf("dupa");
+    // int last = 
+    std::vector<Job*> Pi;
+    Pi.push_back(J.at(J.size()-1));
 
-    // for(int i = 0; i < combinations.size(); ++i) { // dla każdej kombinacji
-    //     int combinationSize = combinations[i].size(); // tyle jest zadań w kombinacji
-    //     std::bitset<8> tmp(0); 
-
-    //     for (size_t j = 0; j < combinationSize; j++) 
-    //     {
-    //         int dupa = combinations[i][j]->number - 1;
-    //         tmp |= 1<<(dupa);
-    //         // std::cout << dupa << "|" << tmp << std::endl;
-    //     }
-
-    //     unsigned long idx = tmp.to_ulong();
-    //     // std::cout << tmp << "=" << idx << std::endl;
-
-    //     if(memory[idx] == -1) {
-    //         printf("policz %d\n", idx);
-    //         memory[idx] = 7;
-    //     } else {
-    //         // printf("%d już policzone\n", idx);
-    //     }
-    // }
+    for (size_t j = 0; j < J.size(); j++) {
+        printf("[%d] ", J[j]->number);
+    }
     
-    return N;
+    return Pi;
 
 }
