@@ -5,6 +5,7 @@
 #include <cstring>
 #include <bitset>
 #include <iostream>
+#include <map>
 
 
 /**
@@ -110,6 +111,34 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
 }
 
 
+int processingSum(const std::vector<Job*> &D) {
+    int sum = 0;
+
+    for (size_t i = 0; i < D.size(); i++)
+    {
+        sum += D[i]->processingTime;
+    }
+    
+    return sum;
+}
+
+std::vector<Job*> createD(std::vector<Job*> N, int i) {
+    std::vector<Job*> tmp;
+    std::bitset<16> number(i);
+
+    printf("\n Numer %d, Zadania: ", i);
+    for (size_t j = 0; j < N.size(); j++)
+    {
+        if(number.test(j)) {
+            tmp.push_back(N[j]);
+            printf("[%d] ", j);
+        }
+    }
+
+    return tmp;
+}
+
+
 /**
  * Algorytm dynamiczny.
  *
@@ -118,63 +147,48 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
  */
 std::vector<Job*> Dynamic(std::vector<Job*> N) {
     int size = N.size();
-    int memSize = 1<<size;
-    int memory[memSize];
-    int idx = 0;
+    std::vector<int> memory(1<<size, 0);
+    std::map<int, Job*> results;
+
+
+    for (size_t i = 1; i < 1<<size; i++)
+    {
+        auto D = createD(N, i);
+        int sum = processingSum(D);
+        int min = 1<<16;
+        int minJ;
+
+        for (size_t j = 0; j < D.size(); j++)
+        {
+            int max = std::max(sum - D[j]->deadline, 0);
+            std::bitset<16> idx(i);
+            idx.reset(D[j]->number-1);
+            int tmp = max * D[j]->weight + memory[idx.to_ulong()];
+
+            if(tmp < min) {
+                min = tmp;
+                minJ = j;
+            }
+            printf("T: %d, W: %d, F(%d): %d, result: %d\n", max, D[j]->weight, idx.to_ulong(), memory[idx.to_ulong()], tmp);
+        }
+
+        memory[i] = min;
+        results[i] = D[minJ];
+        
+    }
+
     std::vector<Job*> J;
+    int tmp = results.size();
 
-    memory[0] = 0;
-    
-    for (size_t i = 1; i < memSize; i++) {
-        std::bitset<8> number(i); 
-        int combinationSize = number.count(); // tyle jest zadań w kombinacji
-        std::vector<Job*> tmp;
-        int sum = 0;
-        int result = 1<<16;
-
-        printf("\n Numer %d, Zadania: ", i);
-        for (size_t j = 0; j < 8; j++) 
-        {
-            if(number.test(j)) {
-                tmp.push_back(N[j]);
-                printf("[%d] ", j);
-                sum += N[j]->processingTime;
-            }
-        }
-        // printf("\nSuma wykonywania %d\n", sum);
-
-
-        for (size_t j = 0; j < tmp.size(); j++)
-        {
-            int T = sum - tmp[j]->deadline;
-            if(T<0) T = 0;
-            int max = std::max(T, 0);
-            std::bitset<8> prev(i);
-            // std::cout << prev << std::endl;
-            prev.reset(tmp[j]->number-1);
-            int min = std::min(max * tmp[j]->weight + memory[prev.to_ulong()], result);
-            if(min < result) {
-                idx = tmp[j]->number;
-                J.push_back(tmp[j]);
-                result = min;
-            }
-            printf("T: %d, W: %d, F(%d): %d, MAX: %d, result: %d, idx: %d\n", T, tmp[j]->weight, prev.to_ulong(), memory[prev.to_ulong()], max, result, idx);
-        }
-
-        memory[i] = result;
-        
-        
+    for (size_t i = 0; i < N.size(); i++)
+    {
+        printf("[%d] \n", tmp);
+        // J.push_back(results[tmp]);
+        int dupa = tmp - results[tmp]->number;
+        tmp = results[dupa]->number;
     }
-    
-    printf("dupa");
-    // int last = 
-    std::vector<Job*> Pi;
-    Pi.push_back(J.at(J.size()-1));
 
-    for (size_t j = 0; j < J.size(); j++) {
-        printf("[%d] ", J[j]->number);
-    }
-    
-    return Pi;
+    printf("\ndupa\n");
 
+    // return results;
 }
