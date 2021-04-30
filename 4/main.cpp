@@ -108,11 +108,16 @@ void log(const char* name, std::vector<Job*> pi, fun ptr = nullptr) {
 
 int main() {
     int seed = 1;
-    int n = 8;
+    int n = 3;
 
     printf("seed: %d\nrozmiar: %d\n\n", seed, n);
 
-    std::vector<Job*> J = generateOperations(n, seed);
+    // std::vector<Job*> J = generateOperations(n, seed);
+    std::vector<Job*> J;
+    J.push_back(new Job(1,3,2,2));
+    J.push_back(new Job(2,8,3,4));
+    J.push_back(new Job(3,3,5,5));
+        
 
     log("Naturalna", J);
     log("Greedy", J, Greedy);

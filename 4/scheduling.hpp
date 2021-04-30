@@ -120,33 +120,72 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
     int size = N.size();
     int memSize = 1<<size;
     int memory[memSize];
+
+    memory[0] = 0;
     
-    for (size_t i = 0; i < memSize; i++) memory[i] = -1;
+    for (size_t i = 1; i < memSize; i++) {
+        std::bitset<8> number(i); 
+        int combinationSize = number.count(); // tyle jest zadań w kombinacji
+        std::vector<Job*> tmp;
+        int sum = 0;
+        int result = 1<<16;
+        int idx = 0;
 
-    auto g = Graf<Job*>::tree(N); // buduj drzewo // 21s
-    auto combinations = traverse(g); // generuj kombinacje // 40s
-
-    for(int i = 0; i < combinations.size(); ++i) { // dla każdej kombinacji
-        int combinationSize = combinations[i].size(); // tyle jest zadań w kombinacji
-        std::bitset<8> tmp(0); 
-
-        for (size_t j = 0; j < combinationSize; j++) 
+        printf("\n Numer %d, Zadania: ", i);
+        for (size_t j = 0; j < 8; j++) 
         {
-            int dupa = combinations[i][j]->number - 1;
-            tmp |= 1<<(dupa);
-            // std::cout << dupa << "|" << tmp << std::endl;
+            if(number.test(j)) {
+                tmp.push_back(N[j]);
+                printf("[%d] ", j);
+                sum += N[j]->processingTime;
+            }
+        }
+        printf("\nSuma wykonywania %d\n", sum);
+
+
+        for (size_t j = 0; j < tmp.size(); j++)
+        {
+            int dupa = sum - tmp[j]->deadline;
+            int max = std::max(dupa, 0);
+            std::bitset<8> prev(i);
+            std::cout << prev << std::endl;
+            prev.reset(tmp[j]->number-1);
+            int min = std::min(max * tmp[j]->weight + memory[prev.to_ulong()], result);
+            if(min < result) {
+                idx = j;
+                result = min;
+            }
+            printf("T: %d, W: %d, F(%d): %d, MAX: %d, result: %d, idx: %d\n", dupa, tmp[j]->weight, prev.to_ulong(), memory[prev.to_ulong()], max, result, idx);
         }
 
-        unsigned long idx = tmp.to_ulong();
-        // std::cout << tmp << "=" << idx << std::endl;
-
-        if(memory[idx] == -1) {
-            printf("policz %d\n", idx);
-            memory[idx] = 7;
-        } else {
-            // printf("%d już policzone\n", idx);
-        }
+        memory[i] = result;
+        
+        
     }
+    
+    printf("dupa");
+
+    // for(int i = 0; i < combinations.size(); ++i) { // dla każdej kombinacji
+    //     int combinationSize = combinations[i].size(); // tyle jest zadań w kombinacji
+    //     std::bitset<8> tmp(0); 
+
+    //     for (size_t j = 0; j < combinationSize; j++) 
+    //     {
+    //         int dupa = combinations[i][j]->number - 1;
+    //         tmp |= 1<<(dupa);
+    //         // std::cout << dupa << "|" << tmp << std::endl;
+    //     }
+
+    //     unsigned long idx = tmp.to_ulong();
+    //     // std::cout << tmp << "=" << idx << std::endl;
+
+    //     if(memory[idx] == -1) {
+    //         printf("policz %d\n", idx);
+    //         memory[idx] = 7;
+    //     } else {
+    //         // printf("%d już policzone\n", idx);
+    //     }
+    // }
     
     return N;
 
