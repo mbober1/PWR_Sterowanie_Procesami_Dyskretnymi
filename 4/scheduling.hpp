@@ -123,8 +123,8 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
     
     for (size_t i = 0; i < memSize; i++) memory[i] = -1;
 
-    auto g = Graf<Job*>::tree(N); // buduj drzewo
-    auto combinations = traverse(g); // generuj kombinacje
+    auto g = Graf<Job*>::tree(N); // buduj drzewo // 21s
+    auto combinations = traverse(g); // generuj kombinacje // 40s
 
     for(int i = 0; i < combinations.size(); ++i) { // dla każdej kombinacji
         int combinationSize = combinations[i].size(); // tyle jest zadań w kombinacji
@@ -146,11 +146,8 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
         } else {
             // printf("%d już policzone\n", idx);
         }
-        
-        
-
     }
     
-    return combinations[0];
+    return N;
 
 }

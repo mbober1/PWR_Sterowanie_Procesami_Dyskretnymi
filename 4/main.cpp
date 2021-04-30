@@ -2,6 +2,9 @@
 #include "RandomNumberGenerator.h"
 #include "scheduling.hpp"
 #include <stdio.h>
+#include <chrono>
+
+typedef std::vector<Job*> (*fun)(std::vector<Job*>);
 
 
 /**
@@ -45,7 +48,12 @@ std::vector<Job*> generateOperations(const int &n, const int &seed) {
  * @param name Nazwa zadania.
  * @param pi Wektor z uporządkowanymi zadaniami.
  */
-void log(const char* name, const std::vector<Job*> &pi) {
+void log(const char* name, std::vector<Job*> pi, fun ptr = nullptr) {
+    
+    auto start = std::chrono::system_clock::now();
+    if(ptr != nullptr)  pi = ptr(pi);
+    auto end = std::chrono::system_clock::now();
+
     int size = pi.size();
     int *C = new int[size];
     int *T = new int[size];
@@ -89,10 +97,12 @@ void log(const char* name, const std::vector<Job*> &pi) {
     printf("]\n");
 
 
-    printf("wiTi: %d\n\n", wiTi);
+    std::chrono::duration<double> diff = end-start;
+    printf("wiTi: %d\n", wiTi);
+    printf("Time: %fs\n\n", diff);
 
-    // delete[] C;
-    // delete[] T;
+    delete[] C;
+    delete[] T;
 }
 
 
@@ -105,9 +115,9 @@ int main() {
     std::vector<Job*> J = generateOperations(n, seed);
 
     log("Naturalna", J);
-    log("Greedy", Greedy(J));
-    log("BruteForce", BruteForce(J));
-    log("Dynamic", Dynamic(J));
+    log("Greedy", J, Greedy);
+    log("BruteForce", J, BruteForce);
+    log("Dynamic", J, Dynamic);
     // Dynamic(J);
 
     return 0;
