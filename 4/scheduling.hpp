@@ -111,28 +111,36 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
 }
 
 
+/**
+ * Policz sumę czasów działania.
+ *
+ * @param D Wektor operacji.
+ * @return Zwraca sumę czasów działania.
+ */
 int processingSum(const std::vector<Job*> &D) {
-    int sum = 0;
+    int sum = 0; // suma czasów
 
-    for (size_t i = 0; i < D.size(); i++)
+    for (size_t i = 0; i < D.size(); i++) // dla każdej operacji
     {
-        sum += D[i]->processingTime;
+        sum += D[i]->processingTime; // dodaj czas
     }
     
     return sum;
 }
 
-std::vector<Job*> createD(std::vector<Job*> N, int i) {
-    std::vector<Job*> tmp;
-    std::bitset<16> number(i);
 
-    // printf("\n Numer %d, Zadania: ", i);
-    for (size_t j = 0; j < N.size(); j++)
+/**
+ * Stwórz wektor operacji na podstawie bitów.
+ *
+ * @param D Wektor wszystkich operacji.
+ * @return Zwraca wektor wybranych operacji.
+ */
+std::vector<Job*> createD(std::vector<Job*> N, int i) {
+    std::vector<Job*> tmp; // nowy wektor operacji
+
+    for (size_t j = 0; j < N.size(); j++) // dla każdej operacji
     {
-        if(number.test(j)) {
-            tmp.push_back(N[j]);
-            // printf("[%d] ", j);
-        }
+        if(i & (1<<j)) tmp.push_back(N[j]); // dodaj do nowego wektora gdy spełnia bitset
     }
 
     return tmp;
@@ -146,49 +154,46 @@ std::vector<Job*> createD(std::vector<Job*> N, int i) {
  * @return Zwraca najlepszą kombinację.
  */
 std::vector<Job*> Dynamic(std::vector<Job*> N) {
-    int size = N.size();
-    std::vector<int> memory(1<<size, 0);
-    std::map<int, Job*> results;
+    int size = N.size(); // ilość operacji
+    std::vector<int> memory(1<<size, 0); // tablica wyników
+    std::map<int, Job*> results; // mapa rezultatów
     results[0] = nullptr;
 
 
-    for (size_t i = 1; i < 1<<size; i++)
+    for (size_t i = 1; i < 1<<size; i++) // dla każdej operacji
     {
-        auto D = createD(N, i);
-        int sum = processingSum(D);
-        int min = 1<<16;
-        int minJ;
+        auto D = createD(N, i); // stwórz nowy wektor na podstawie bitsetu
+        int sum = processingSum(D); // policz sume czasów wykonywania
+        int min = 1<<16; // minimum
+        int minJ; // indeks najmniejszego
 
-        for (size_t j = 0; j < D.size(); j++)
+        for (size_t j = 0; j < D.size(); j++) // dla każdej operacji w nowym wektorze
         {
-            int max = std::max(sum - D[j]->deadline, 0);
-            std::bitset<16> idx(i);
-            idx.reset(D[j]->number-1);
-            int tmp = max * D[j]->weight + memory[idx.to_ulong()];
+            int max = std::max(sum - D[j]->deadline, 0); // policz sumę bez ostatniego deadlinea
+            int idx = i ^ (1<< D[j]->number-1 ); // indeks elementu w pamięci
+            int tmp = max * D[j]->weight + memory[idx]; // weź sume, pomnóż przez kare i dodaj poprzedni
 
-            if(tmp < min) {
-                min = tmp;
-                minJ = j;
+            if(tmp < min) { // jeżeli okaże się mniejsze od najmniejszego
+                min = tmp; // przypisz do najmniejszego
+                minJ = j; // nie zapomnij o indeksie
             }
-            // printf("T: %d, W: %d, F(%d): %d, result: %d\n", max, D[j]->weight, idx.to_ulong(), memory[idx.to_ulong()], tmp);
         }
 
-        memory[i] = min;
-        results[i] = D[minJ];
+        memory[i] = min; // wpisz najmniejszą wartość do pamięci
+        results[i] = D[minJ]; // i dodaj do listy rezultatów
         
     }
 
-    std::vector<Job*> J;
-    int tmp = results.size() - 1;
+    std::vector<Job*> J; // wektor wynikowy
+    int tmp = results.size() - 1; // indeks na ostatni element
 
-    while(tmp > 0)
+    while(tmp > 0) // gdy tmp większe od zera
     {
-        // printf("[%d] \n", tmp);
-        J.push_back(results[tmp]);
-        tmp ^= (1<<(results[tmp]->number - 1));
+        J.push_back(results[tmp]); // dodaj do wyników
+        tmp ^= (1<<(results[tmp]->number - 1)); // ustaw indeks na kolejny element (backtracing)
     }
 
-    std::reverse(J.begin(), J.end());
+    std::reverse(J.begin(), J.end()); // odwróć kolejność
 
     return J;
 }
