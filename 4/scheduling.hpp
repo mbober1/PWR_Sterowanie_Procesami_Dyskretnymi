@@ -126,12 +126,12 @@ std::vector<Job*> createD(std::vector<Job*> N, int i) {
     std::vector<Job*> tmp;
     std::bitset<16> number(i);
 
-    printf("\n Numer %d, Zadania: ", i);
+    // printf("\n Numer %d, Zadania: ", i);
     for (size_t j = 0; j < N.size(); j++)
     {
         if(number.test(j)) {
             tmp.push_back(N[j]);
-            printf("[%d] ", j);
+            // printf("[%d] ", j);
         }
     }
 
@@ -149,6 +149,7 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
     int size = N.size();
     std::vector<int> memory(1<<size, 0);
     std::map<int, Job*> results;
+    results[0] = nullptr;
 
 
     for (size_t i = 1; i < 1<<size; i++)
@@ -169,7 +170,7 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
                 min = tmp;
                 minJ = j;
             }
-            printf("T: %d, W: %d, F(%d): %d, result: %d\n", max, D[j]->weight, idx.to_ulong(), memory[idx.to_ulong()], tmp);
+            // printf("T: %d, W: %d, F(%d): %d, result: %d\n", max, D[j]->weight, idx.to_ulong(), memory[idx.to_ulong()], tmp);
         }
 
         memory[i] = min;
@@ -178,17 +179,16 @@ std::vector<Job*> Dynamic(std::vector<Job*> N) {
     }
 
     std::vector<Job*> J;
-    int tmp = results.size();
+    int tmp = results.size() - 1;
 
-    for (size_t i = 0; i < N.size(); i++)
+    while(tmp > 0)
     {
-        printf("[%d] \n", tmp);
-        // J.push_back(results[tmp]);
-        int dupa = tmp - results[tmp]->number;
-        tmp = results[dupa]->number;
+        // printf("[%d] \n", tmp);
+        J.push_back(results[tmp]);
+        tmp ^= (1<<(results[tmp]->number - 1));
     }
 
-    printf("\ndupa\n");
+    std::reverse(J.begin(), J.end());
 
-    // return results;
+    return J;
 }
