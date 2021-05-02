@@ -118,7 +118,6 @@ int main() {
     log("Greedy", J, Greedy);
     log("BruteForce", J, BruteForce);
     log("Dynamic", J, Dynamic);
-    // Dynamic(J);
 
     return 0;
 }
