@@ -3,6 +3,7 @@
 #include "scheduling.hpp"
 #include <stdio.h>
 #include <chrono>
+#include <iostream>
 
 typedef std::vector<Job*> (*fun)(std::vector<Job*>);
 
@@ -109,6 +110,8 @@ void log(const char* name, std::vector<Job*> pi, fun ptr = nullptr) {
 int main() {
     int seed = 1;
     int n = 8;
+
+    std::cin >> seed >> n;
 
     printf("seed: %d\nrozmiar: %d\n\n", seed, n);
 
