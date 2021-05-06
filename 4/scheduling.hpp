@@ -1,11 +1,5 @@
 #include "operation.hpp"
-#include <algorithm>
 #include "graf.hpp"
-#include <stdio.h>
-#include <cstring>
-#include <bitset>
-#include <iostream>
-#include <map>
 
 
 /**
