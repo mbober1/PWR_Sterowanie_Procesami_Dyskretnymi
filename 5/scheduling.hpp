@@ -6,6 +6,7 @@
 #include <queue>
 #include <functional>
 #include <algorithm>
+#include <tuple>
 
 
 /**
@@ -108,14 +109,14 @@ std::vector<Job*> Jonson(std::vector<Job*> N) {
     return Pi;
 }   
 
-std::vector<Operation> CriticalPath(std::vector<Job*> Pi) {
+std::vector<std::tuple<int, int>> CriticalPath(std::vector<Job*> Pi) {
     int m = Pi[0]->op.size() - 1;
     auto n = Pi.back(); //aktualne zadanie
     int idx = Pi.size() - 1;
-    std::vector<Operation> J;
+    std::vector<std::tuple<int, int>> J;
     Cemaks(Pi);
 
-    J.push_back(n->op[m]);
+    J.push_back({idx, m});
 
     while(n->op[0].number > 1) {
         int start = n->op[m].end - n->op[m].duration;
@@ -123,11 +124,11 @@ std::vector<Operation> CriticalPath(std::vector<Job*> Pi) {
 
         if(prevEnd == start) {
             idx--;
-            J.push_back(Pi[idx]->op[m]);
+            J.push_back({idx, m});
             n = Pi[idx];
         } else {
-            J.push_back(n->op[m]);
             m--;
+            J.push_back({idx, m});
         }
     }
 
@@ -158,7 +159,7 @@ bool CompareSumP(Job* a, Job* b) {
  * @param N Wektor operacji.
  * @return Zwraca najlepszą kombinację.
  */
-std::vector<Job*> NEH(std::vector<Job*> N) {
+std::vector<Job*> NEH(std::vector<Job*> N, int upgrade = 0) {
     std::vector<Job*> Pi;
     
     std::sort(N.begin(), N.end(), CompareSumP);
@@ -183,8 +184,59 @@ std::vector<Job*> NEH(std::vector<Job*> N) {
 
         Pi.insert(Pi.begin() + idx, j);
         N.pop_back();
+
+        auto patch = CriticalPath(Pi);
+        Job* extraJob;
+        int extraIdx;
+
+        switch (upgrade)
+        {
+        case 1: {
+                int max = 0;
+                for (size_t i = 0; i < patch.size(); i++)
+                {
+                    auto job = Pi[std::get<0>(patch[i])];
+                    auto duration = job->op[std::get<1>(patch[i])].duration;
+                    if(duration > max) {
+                        max = duration;
+                        extraJob = job;
+                        extraIdx = std::get<0>(patch[i]);
+                    }
+                }                
+                break;
+            }
+
+        // case 2: {
+
+        //         break;
+        //     }
+
+        }
+
+
+
         
+
+        if(upgrade) {
+            for (size_t l = 0; l <= Pi.size(); l++)
+            {
+                Pi.insert(Pi.begin() + l, extraJob);
+                int tmp = Cemaks(Pi);
+
+                if(tmp < Cx) {
+                    Cx = tmp;
+                    idx = l;
+                }
+
+                Pi.erase(Pi.begin() + l);
+            }
+
+            Pi.insert(Pi.begin() + idx, extraJob);
+            Pi.erase(Pi.begin() + extraIdx);
+        }
+
     }
+    
 
     return Pi;
 

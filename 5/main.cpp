@@ -62,9 +62,8 @@ int main() {
 
     log("Naturalna", J);
     log("Jonson", Jonson(J));
-    log("NEH", NEH(J));
+    log("NEH", NEH(J, 1));
 
-    std::vector<Operation> path = CriticalPath(NEH(J));
 
     // log("BruteForce", BruteForce(J));
     // log("BnB", initBranchAndBound(J));
