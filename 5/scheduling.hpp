@@ -108,6 +108,31 @@ std::vector<Job*> Jonson(std::vector<Job*> N) {
     return Pi;
 }   
 
+std::vector<Operation> CriticalPath(std::vector<Job*> Pi) {
+    int m = Pi[0]->op.size() - 1;
+    auto n = Pi.back(); //aktualne zadanie
+    int idx = Pi.size() - 1;
+    std::vector<Operation> J;
+    Cemaks(Pi);
+
+    J.push_back(n->op[m]);
+
+    while(n->op[0].number > 1) {
+        int start = n->op[m].end - n->op[m].duration;
+        int prevEnd = Pi[idx-1]->op[m].end;
+
+        if(prevEnd == start) {
+            idx--;
+            J.push_back(Pi[idx]->op[m]);
+            n = Pi[idx];
+        } else {
+            J.push_back(n->op[m]);
+            m--;
+        }
+    }
+
+    return J;
+}
 
 bool CompareSumP(Job* a, Job* b) {
     int aSum = 0;
