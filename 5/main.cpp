@@ -7,6 +7,30 @@
 
 typedef std::vector<Job*> (*fun)(std::vector<Job*>);
 
+// /**
+//  * Generuje dane.
+//  *
+//  * @param n Ilość zadań.
+//  * @param m Ilość maszyn.
+//  * @return Zwraca nieuporządkowane zadania.
+//  */
+// std::vector<Job*> generateOperations(const int &n, const int &m, const int &seed) {
+//     RandomNumberGenerator randf(seed);
+//     std::vector<Job*> J;
+//     int dupa[] = {1,9,2,9,6,6,4,5,8,9,4,6,8,9,2};
+//     int d = 0;
+
+//     for(int j = 1; j <= n; ++j) {
+//         Job* tmp = new Job();
+//         for(int i = 1; i <= m; ++i) {
+//             randf.nextInt(1, floor(m* 1.2));
+//             tmp->addOperation(Operation(j, dupa[d++]));
+//         }
+//         J.push_back(tmp);
+//     }
+//     return J;
+// }
+
 /**
  * Generuje dane.
  *
@@ -17,19 +41,17 @@ typedef std::vector<Job*> (*fun)(std::vector<Job*>);
 std::vector<Job*> generateOperations(const int &n, const int &m, const int &seed) {
     RandomNumberGenerator randf(seed);
     std::vector<Job*> J;
-    int dupa[] = {1,9,2,9,6,6,4,5,8,9,4,6,8,9,2};
-    int d = 0;
 
     for(int j = 1; j <= n; ++j) {
         Job* tmp = new Job();
         for(int i = 1; i <= m; ++i) {
-            randf.nextInt(1, floor(m* 1.2));
-            tmp->addOperation(Operation(j, dupa[d++]));
+            tmp->addOperation(Operation(j, randf.nextInt(1, 29)));
         }
         J.push_back(tmp);
     }
     return J;
 }
+
 
 
 
@@ -62,7 +84,9 @@ int main() {
 
     log("Naturalna", J);
     log("Jonson", Jonson(J));
+    log("NEH", NEH(J));
     log("NEH", NEH(J, 1));
+    log("NEH", NEH(J, 2));
 
 
     // log("BruteForce", BruteForce(J));

@@ -1,12 +1,12 @@
 #include <vector>
 #include "operation.hpp"
 #include "RandomNumberGenerator.h"
-// #include "graf.hpp"
 #include <stdio.h>
 #include <queue>
 #include <functional>
 #include <algorithm>
 #include <tuple>
+#include <map>
 
 
 /**
@@ -109,47 +109,91 @@ std::vector<Job*> Jonson(std::vector<Job*> N) {
     return Pi;
 }   
 
+
+/**
+ * Liczenie ścieżki krytycznej
+ *
+ * @param Pi Wektor zadań.
+ * @return Zwraca wektor z informacjami o ścieżce krytycznej
+ */
 std::vector<std::tuple<int, int>> CriticalPath(std::vector<Job*> Pi) {
-    int m = Pi[0]->op.size() - 1;
-    auto n = Pi.back(); //aktualne zadanie
-    int idx = Pi.size() - 1;
-    std::vector<std::tuple<int, int>> J;
-    Cemaks(Pi);
+    int m = Pi[0]->op.size() - 1; // aktualna maszyna
+    auto n = Pi.back(); // aktualne zadanie
+    int idx = Pi.size() - 1;  // index aktualnego joba w wektorze Pi
+    std::vector<std::tuple<int, int>> J; // wektor z elementami ścieżki krytycznej (indeks zadania, indeks maszyny)
+    Cemaks(Pi); // ustaw poprawnie tablice S i C
 
-    J.push_back({idx, m});
+    J.push_back({idx, m}); // dorzuć ostatnie zadanie do ścieżki
 
-    while(n->op[0].number > 1) {
-        int start = n->op[m].end - n->op[m].duration;
-        int prevEnd = Pi[idx-1]->op[m].end;
+    while(idx > 0) { // dopóki nie jesteśmy na pierwszym zadaniu
+        int start = n->op[m].end - n->op[m].duration; // czas rozpoczęcia zadania 
+        int prevEnd = Pi[idx-1]->op[m].end; // czas końca poprzedniego zadania
 
-        if(prevEnd == start) {
-            idx--;
-            J.push_back({idx, m});
+        if(prevEnd == start) { // jeśli nowe zadanie zaczyna się tam gdzie poprzednie kończy
+            idx--; // zmień zadanie na poprzednie
+            J.push_back({idx, m}); // dorzuć kolejne zadanie do ścieżki
             n = Pi[idx];
-        } else {
-            m--;
-            J.push_back({idx, m});
+        } else { // jeśli nie
+            m--; // zmień maszynę na poprzednią
+            J.push_back({idx, m}); // dorzuć kolejne zadanie do ścieżki
         }
     }
 
     return J;
 }
 
+
+/**
+ * Wybierz zadanie z dłuższą sumą wykonywania operacji.
+ *
+ * @param a Zadanie 1.
+ * @param b Zadanie 2
+ * @return Zwraca prawdę czy A < B
+ */
 bool CompareSumP(Job* a, Job* b) {
     int aSum = 0;
     int bSum = 0;
 
     for (size_t i = 0; i < a->op.size(); i++)
     {
-        aSum += a->op[i].duration;
+        aSum += a->op[i].duration; // policz czasy zadania A
     }
 
     for (size_t i = 0; i < b->op.size(); i++)
     {
-        bSum += b->op[i].duration;
+        bSum += b->op[i].duration; // policz czasy zadania B
     }
 
     return aSum < bSum;
+}
+
+
+/**
+ * Znajdź najlepsze miejsce dla zadania.
+ *
+ * @param Pi Wektor operacji.
+ * @param job Zadanie do wstawienia.
+ * @return Zwraca wektor z dodanym zadaniem.
+ */
+std::vector<Job*> NehInsert(std::vector<Job*> Pi, Job* job) {
+    int minCmax = 1<<16; // minimalny Cmax
+    int idx;
+
+    for (size_t l = 0; l <= Pi.size(); l++) // dla każdej możliwej pozycji
+    {
+        Pi.insert(Pi.begin() + l, job); // dodaj tymczasowo zadanie na danej pozycji
+        int tmp = Cemaks(Pi); // policz Cmax
+
+        if(tmp < minCmax) { // jeżeli okaże się mniejszy
+            minCmax = tmp;
+            idx = l;
+        }
+
+        Pi.erase(Pi.begin() + l); // usuń zadanie z tej pozycji 
+    }
+
+    Pi.insert(Pi.begin() + idx, job); // dodaj zadanie w najlepszej znalezionej pozycji
+    return Pi;
 }
 
 
@@ -162,82 +206,72 @@ bool CompareSumP(Job* a, Job* b) {
 std::vector<Job*> NEH(std::vector<Job*> N, int upgrade = 0) {
     std::vector<Job*> Pi;
     
-    std::sort(N.begin(), N.end(), CompareSumP);
+    std::sort(N.begin(), N.end(), CompareSumP); // posortuj od najdłuższych czasów wykonania
 
-    while(!N.empty()) {
-        auto j = N.back();
-        int Cx = 1<<16;
-        int idx;
-
-        for (size_t l = 0; l <= Pi.size(); l++)
-        {
-            Pi.insert(Pi.begin() + l, j);
-            int tmp = Cemaks(Pi);
-
-            if(tmp < Cx) {
-                Cx = tmp;
-                idx = l;
-            }
-
-            Pi.erase(Pi.begin() + l);
-        }
-
-        Pi.insert(Pi.begin() + idx, j);
-        N.pop_back();
-
-        auto patch = CriticalPath(Pi);
-        Job* extraJob;
-        int extraIdx;
-
-        switch (upgrade)
-        {
-        case 1: {
-                int max = 0;
-                for (size_t i = 0; i < patch.size(); i++)
-                {
-                    auto job = Pi[std::get<0>(patch[i])];
-                    auto duration = job->op[std::get<1>(patch[i])].duration;
-                    if(duration > max) {
-                        max = duration;
-                        extraJob = job;
-                        extraIdx = std::get<0>(patch[i]);
-                    }
-                }                
-                break;
-            }
-
-        // case 2: {
-
-        //         break;
-        //     }
-
-        }
+    while(!N.empty()) { // gdy są jakieś zadania
+        auto j = N.back(); // weź to z najkrótszym czasem
+        Pi = NehInsert(Pi, j); // wstaw w najlepszej pozycji
+        N.pop_back(); // usuń z nieuszeregowanych
 
 
+        if(upgrade) { // jeżeli wybierzemy upgrade
+            auto path = CriticalPath(Pi); // policz ścieżkę krytyczną
+            Job* extraJob; // znalezione zadanie
+            int extraIdx; // indeks znalezionego zadania
 
-        
-
-        if(upgrade) {
-            for (size_t l = 0; l <= Pi.size(); l++)
+            switch (upgrade)
             {
-                Pi.insert(Pi.begin() + l, extraJob);
-                int tmp = Cemaks(Pi);
+            case 1: { // Zadanie zawierające najdłuższą operacje na ścieżce krytycznej
+                    int max = 0; // maksymalny czas trwania operacji
 
-                if(tmp < Cx) {
-                    Cx = tmp;
-                    idx = l;
+                    for (size_t i = 0; i < path.size(); i++) // dla każdej operacji na ścieżce
+                    {
+                        auto job = Pi[std::get<0>(path[i])];
+                        auto duration = job->op[std::get<1>(path[i])].duration;
+
+                        if(duration > max) {
+                            max = duration;
+                            extraJob = job;
+                            extraIdx = std::get<0>(path[i]);
+                        }
+                    }                
+                    break;
                 }
 
-                Pi.erase(Pi.begin() + l);
+            case 2: { // Zadanie zawierające największą sumę operacji wchodzących w ścieżkę krytyczną
+                    std::map<int, int> durations; // mapa czasów trwania
+                    int max = 0; // największa ilość wystąpień zadania
+
+                    for (size_t i = 0; i < path.size(); i++) // dla każdej operacji na ścieżce
+                    {
+                        auto idx = std::get<0>(path[i]);
+                        auto job = Pi[idx];
+                        auto duration = job->op[std::get<1>(path[i])].duration;
+                        
+                        durations[idx] += duration;
+                    }
+
+                    
+                    for (auto const& x : durations) { // dla każdego elementu w mapie
+                        if(x.second > max)  { // jeżeli czas trwania operacji jest większy
+                            extraIdx = x.first;
+                            max = x.second;
+                        }
+                    }
+
+                    extraJob = Pi[extraIdx];
+                    
+                    break;
+                }
+
             }
 
-            Pi.insert(Pi.begin() + idx, extraJob);
-            Pi.erase(Pi.begin() + extraIdx);
+            Pi.erase(Pi.begin() + extraIdx); // usuń wybrane zadanie
+            Pi = NehInsert(Pi, extraJob); // znajdź mu lepszą pozycję
         }
 
     }
     
-
     return Pi;
 
 }
