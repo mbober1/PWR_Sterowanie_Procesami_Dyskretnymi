@@ -2,10 +2,12 @@
 Exercise implemented during classes at the Wrocław University of Technology.
 
 Prowadzący: Mgr inż. Radosław Idzikowski
+
 http://staff.iiar.pwr.wroc.pl/radoslaw.idzikowski/learning.html
 
 ## Init
-Generowanie instancji, schemat struktury danych
+Generowanie instancji, schemat struktury danych.
+
 Instrukcja:  http://radoslaw.idzikowski.staff.iiar.pwr.wroc.pl/instruction/spdl1.pdf
 
 ## Problem RPQ
