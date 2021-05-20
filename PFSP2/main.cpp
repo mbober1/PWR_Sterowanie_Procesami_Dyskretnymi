@@ -1,6 +1,8 @@
 
-#include "RandomNumberGenerator.h"
 #include "scheduling.hpp"
+#include <chrono>
+#include <iostream>
+#include <math.h>
 
 
 /**
@@ -46,18 +48,18 @@ void log(const char* name, const std::vector<Job*> &pi) {
 
 
 int main() {
-    int seed = 751;
-    int n = 7;
+    int seed = 752;
+    int n = 5;
     int m = 3;
 
     printf("seed: %d\nrozmiar: %dx%d\n\n", seed, n, m);
-
     std::vector<Job*> J = generateOperations(n, m, seed);
 
     log("Naturalna", J);
     log("Jonson", Jonson(J));
-    log("BruteForce", BruteForce(J));
-    log("BnB", initBranchAndBound(J));
+    log("NEH", NEH(J));
+    log("NEH", NEH(J, 1));
+    log("NEH", NEH(J, 2));
 
     return 0;
 }

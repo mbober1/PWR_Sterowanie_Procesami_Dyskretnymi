@@ -1,6 +1,6 @@
 #include <vector>
 #include "operation.hpp"
-#include "RandomNumberGenerator.h"
+#include "../RandomNumberGenerator.h"
 #include <stdio.h>
 #include <queue>
 #include <functional>

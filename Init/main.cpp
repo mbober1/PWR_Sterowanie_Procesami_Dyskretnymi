@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-#include "RandomNumberGenerator.h"
+#include "../RandomNumberGenerator.h"
 #include <iostream> 
 
 

@@ -1,6 +1,6 @@
 #include <vector>
 #include "operation.hpp"
-#include "RandomNumberGenerator.h"
+#include "../RandomNumberGenerator.h"
 #include "graf.hpp"
 #include <stdio.h>
 

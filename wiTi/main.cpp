@@ -1,5 +1,5 @@
 
-#include "RandomNumberGenerator.h"
+#include "../RandomNumberGenerator.h"
 #include "scheduling.hpp"
 #include <stdio.h>
 #include <chrono>

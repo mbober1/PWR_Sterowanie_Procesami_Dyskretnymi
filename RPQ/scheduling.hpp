@@ -3,8 +3,6 @@
 #include "pi.hpp"
 #include <queue>
 
-#define INFINITY (1<<16)
-
 int cmax(std::vector<job> &jobs, const std::vector<Pi> &pi, int* j = nullptr) {
     int c = 0;
     int idx = 0;
@@ -20,7 +18,7 @@ int cmax(std::vector<job> &jobs, const std::vector<Pi> &pi, int* j = nullptr) {
 }
 
 int calcA(std::vector<job> &jobs, const std::vector<Pi> &pi, int b) {
-    int min = INFINITY;
+    int min = (1<<16);
     int minj = 0;
     for(int j = 0; j < pi.size(); ++j) {
         int sum = 0;
