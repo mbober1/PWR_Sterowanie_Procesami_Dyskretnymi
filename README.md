@@ -44,7 +44,7 @@ Zawiera:
 - [X] algorytm Dynamic (programowanie dynamiczne)
 
 Instrukcja:  http://radoslaw.idzikowski.staff.iiar.pwr.wroc.pl/instruction/spdl4.pdf
-<<<<<<< HEAD
+
 
 ## Wybrany problem
 Zawiera:
@@ -53,3 +53,5 @@ Zawiera:
 - [X] algorytm NEH
 - [X] algorytm Symulowanego Wyżarzania
 - [X] algorytm Tabo
+
+Instrukcja:  http://radoslaw.idzikowski.staff.iiar.pwr.wroc.pl/instruction/spdl6.pdf
