@@ -360,7 +360,7 @@ std::vector<Job*> swap(std::vector<Job*> N, int A, int B) {
  * @param L Ilość epok.
  * @return Zwraca najlepszą kombinację.
  */
-std::vector<Job*> SimulatedAnnealing(std::vector<Job*> N, int T, int Tend, int L) {
+std::vector<Job*> SimulatedAnnealing(const std::vector<Job*> N, int T, const int Tend, const int L) {
     std::vector<Job*> Pi = N;
     auto PiBest = Pi; // najlepsza kombinacja
 
@@ -400,8 +400,8 @@ std::vector<Job*> SimulatedAnnealing(std::vector<Job*> N, int T, int Tend, int L
  * @param cadence ilość kadencji (zablokowania na liście tabo).
  * @return Zwraca najlepszą kombinację.
  */
-std::vector<Job*> TabuSearch(std::vector<Job*> N, int itLimit, int cadence) {
-    std::vector<Job*> Pi = NEH(N); // zacznij od NEHa
+std::vector<Job*> TabuSearch(const std::vector<Job*> N, const int itLimit, int const cadence) {
+    std::vector<Job*> Pi = N; // zacznij od NEHa
     auto PiBest = Pi; // najlepsza kombinacja
     int** tabu = new int*[Pi.size()]; // tablica tabo
 

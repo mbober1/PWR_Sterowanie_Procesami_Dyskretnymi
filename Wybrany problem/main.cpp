@@ -58,12 +58,10 @@ int main() {
     log("Naturalna", J);
     log("Jonson", Jonson(J));
     log("NEH", NEH(J));
-    // log("NEH", NEH(J, 1));
-    // log("NEH", NEH(J, 2));
     log("BF", BruteForce(J));
     log("Wyzarzanie", SimulatedAnnealing(J, 200, 0, 200));
-    log("Tabu", TabuSearch(J, 200000, 5));
-
+    log("Tabu", TabuSearch(J, 1000, 1));
+    log("Tabu", TabuSearch(J, 1000, 2));
 
     return 0;
 }
