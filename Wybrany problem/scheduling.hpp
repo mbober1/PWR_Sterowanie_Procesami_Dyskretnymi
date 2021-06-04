@@ -254,6 +254,8 @@ std::vector<Job*> BruteForce(std::vector<Job*> N) {
     }
     return *Pi;
 }
+
+
 /**
  * Algorytm NEH.
  *
@@ -332,6 +334,15 @@ std::vector<Job*> NEH(std::vector<Job*> N, int upgrade = 0) {
 }
 
 
+
+/**
+ * Zamiana dwóch elementów w wektorze
+ *
+ * @param N Wektor operacji.
+ * @param A Element A.
+ * @param B Element B.
+ * @return Zwraca najlepszą kombinację.
+ */
 std::vector<Job*> swap(std::vector<Job*> N, int A, int B) {
     auto tmp = N[A];
     N[A] = N[B];
@@ -344,36 +355,38 @@ std::vector<Job*> swap(std::vector<Job*> N, int A, int B) {
  * Algorytm Symulowane wyżarzanie.
  *
  * @param N Wektor operacji.
+ * @param T Temperatura startowa.
+ * @param Tend Temperatura końcowa.
+ * @param L Ilość epok.
  * @return Zwraca najlepszą kombinację.
  */
 std::vector<Job*> SimulatedAnnealing(std::vector<Job*> N, int T, int Tend, int L) {
     std::vector<Job*> Pi = N;
-    auto PiBest = Pi;
+    auto PiBest = Pi; // najlepsza kombinacja
 
-    while(T > Tend) {
-        for (size_t k = 0; k < L; k++)
+    while(T > Tend) { // dopóki jest temperatura
+        for (size_t k = 0; k < L; k++) // dla każdej epoki
         {
-            int i = rand() % Pi.size();
+            int i = rand() % Pi.size(); // losuj który element zamienić
             int j;
-            do
+            do // losuj drugi element do zamiany inny niż 'i'
             {
                 j = rand() % Pi.size();
             } while (i == j);
             
-            auto PiNew = swap(Pi, i, j);
-            auto CmaxDiff = Cemaks(Pi) - Cemaks(PiNew);
+            auto PiNew = swap(Pi, i, j); // zamień elementy
+            auto CmaxDiff = Cemaks(Pi) - Cemaks(PiNew); // policz różnicę Cmax po zmianie
 
-            if(CmaxDiff <= 0) {
-                double r = ((double)rand())/RAND_MAX;
-                if (r >= exp(CmaxDiff/T)) PiNew = Pi;
+            if(CmaxDiff <= 0) { // jeżeli jest gorzej
+                double r = ((double)rand())/RAND_MAX; // wylosuj prawdopodobieństwo przyjęcia
+                if (r >= exp(CmaxDiff/T)) PiNew = Pi; // jeżeli jest duże to przyjmij gorszą kombinację
             }
 
-            Pi = PiNew;
-            // printf("New Cmax: %d, CmaxDiff: %d\n", Cemaks(Pi), CmaxDiff);
-            if(Cemaks(Pi) < Cemaks(PiBest)) PiBest = Pi;
+            Pi = PiNew; // zapisz nową kombinację
+            if(Cemaks(Pi) < Cemaks(PiBest)) PiBest = Pi; // jeżeli Cmax okaże się najlepszy to też go zapisz
         }
 
-        T -= 1;
+        T -= 1; // zmniejsz temperaturę
     }
     return Pi;
 }
@@ -383,45 +396,45 @@ std::vector<Job*> SimulatedAnnealing(std::vector<Job*> N, int T, int Tend, int L
  * Algorytm Tabu.
  *
  * @param N Wektor operacji.
+ * @param itLimit ilość iteracji.
+ * @param cadence ilość kadencji (zablokowania na liście tabo).
  * @return Zwraca najlepszą kombinację.
  */
 std::vector<Job*> TabuSearch(std::vector<Job*> N, int itLimit, int cadence) {
-    std::vector<Job*> Pi = N;
-    auto PiBest = Pi;
-    int** tabu = new int*[Pi.size()];
+    std::vector<Job*> Pi = NEH(N); // zacznij od NEHa
+    auto PiBest = Pi; // najlepsza kombinacja
+    int** tabu = new int*[Pi.size()]; // tablica tabo
 
-    for (size_t i = 0; i < Pi.size(); i++)
+    for (size_t i = 0; i < Pi.size(); i++) // dla każdej kolumny
     {
-        tabu[i] = new int[Pi.size()];
+        tabu[i] = new int[Pi.size()]; // zaalokuj dynamicznie pamięć
     }
     
 
-    for (size_t it = 0; it < itLimit; it++)
+    for (size_t it = 0; it < itLimit; it++) // dla każdej iteracji
     {
-        int jBest = 0;
-        int kBest = 1;
-        int CBest = INT_MAX;
+        int jBest = 0; // najlepsze j
+        int kBest = 1; // najlepsze k
+        int CBest = INT_MAX; // najlepsze C
 
-        for (size_t j = 0; j < Pi.size()-1; j++)
+        for (size_t j = 0; j < Pi.size()-1; j++) // dla każdego elementu
         {
-            for (size_t k = j+1; k < Pi.size()-1; k++)
+            for (size_t k = j+1; k < Pi.size()-1; k++) // dla każdego elementu
             {
-                if(tabu[j][k] < it) {
-                    auto PiNew = swap(Pi, j ,k);
-                    if(Cemaks(PiNew) < CBest) {
-                        CBest = Cemaks(PiNew);
-                        jBest = j;
-                        kBest = k;
+                if(tabu[j][k] < it) { // jeżeli nie znajduje się na liście tabo
+                    auto PiNew = swap(Pi, j ,k); // zamień elementy
+                    if(Cemaks(PiNew) < CBest) { // jeżeli Cmax okaże się lepszy
+                        CBest = Cemaks(PiNew); // zapisz Cmax
+                        jBest = j; // zapisz element j
+                        kBest = k; // zapisz element k
                     } 
                 }
             }
         }
-        Pi = swap(Pi, jBest, kBest);
-        tabu[jBest][kBest] = it + cadence;
-        if(Cemaks(Pi) < Cemaks(PiBest)) {
-            PiBest = Pi;
-        }
+        Pi = swap(Pi, jBest, kBest); // zamień tak aby uzyskać najlepszą kombinację
+        tabu[jBest][kBest] = it + cadence; // uaktualnij listę tabo
+        if(Cemaks(Pi) < Cemaks(PiBest)) PiBest = Pi; // zapisz najlepszą kombinację
     }
-
+    
     return PiBest;
 }
