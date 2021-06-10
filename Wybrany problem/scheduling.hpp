@@ -343,7 +343,7 @@ std::vector<Job*> NEH(std::vector<Job*> N, int upgrade = 0) {
  * @param B Element B.
  * @return Zwraca najlepszą kombinację.
  */
-std::vector<Job*> swap(std::vector<Job*> N, int A, int B) {
+inline std::vector<Job*> swap(std::vector<Job*> N, int A, int B) {
     auto tmp = N[A];
     N[A] = N[B];
     N[B] = tmp;
@@ -401,7 +401,7 @@ std::vector<Job*> SimulatedAnnealing(const std::vector<Job*> N, int T, const int
  * @return Zwraca najlepszą kombinację.
  */
 std::vector<Job*> TabuSearch(const std::vector<Job*> N, const int itLimit, int const cadence) {
-    std::vector<Job*> Pi = N; // zacznij od NEHa
+    std::vector<Job*> Pi = NEH(N); // zacznij od NEHa
     auto PiBest = Pi; // najlepsza kombinacja
     int** tabu = new int*[Pi.size()]; // tablica tabo
 
@@ -411,7 +411,7 @@ std::vector<Job*> TabuSearch(const std::vector<Job*> N, const int itLimit, int c
     }
     
 
-    for (size_t it = 0; it < itLimit; it++) // dla każdej iteracji
+    for (size_t it = 0; it < itLimit; it++) // do póki nie wyczerpaliśmy iteracji
     {
         int jBest = 0; // najlepsze j
         int kBest = 1; // najlepsze k
